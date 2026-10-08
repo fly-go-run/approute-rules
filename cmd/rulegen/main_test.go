@@ -24,10 +24,11 @@ func writeFixture(t *testing.T, work string) {
 		}
 	}
 	files := map[string]string{
-		"delegated-apnic-latest": "2|apnic|20261009|2|19830613|20261008|+1000\napnic|CN|ipv4|1.0.1.0|256|20110414|allocated\napnic|CN|ipv6|2001:250::|35|20000101|allocated\n",
-		"telegram-cidr.txt":      "91.108.4.0/22\n2a0a:f280::/32\n",
-		"goog.json":              `{"creationTime":"t1","prefixes":[{"ipv4Prefix":"8.8.8.0/24"},{"ipv4Prefix":"34.0.0.0/24"}]}`,
-		"cloud.json":             `{"creationTime":"t2","prefixes":[{"ipv4Prefix":"34.0.0.0/16"}]}`,
+		"delegated-apnic-latest":         "2|apnic|20261009|2|19830613|20261008|+1000\napnic|CN|ipv4|1.0.1.0|256|20110414|allocated\napnic|CN|ipv6|2001:250::|35|20000101|allocated\n",
+		"telegram-cidr.txt":              "91.108.4.0/22\n2a0a:f280::/32\n",
+		"goog.json":                      `{"creationTime":"t1","prefixes":[{"ipv4Prefix":"8.8.8.0/24"},{"ipv4Prefix":"34.0.0.0/24"}]}`,
+		"cloud.json":                     `{"creationTime":"t2","prefixes":[{"ipv4Prefix":"34.0.0.0/16"}]}`,
+		"accelerated-domains.china.conf": "# c\nserver=/long-tail.example.cn/114.114.114.114\nserver=/bad line\n",
 	}
 	for n, c := range files {
 		if err := os.WriteFile(filepath.Join(work, n), []byte(c), 0o644); err != nil {

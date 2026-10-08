@@ -21,6 +21,7 @@ import (
 
 	"github.com/fly-go-run/approute-rules/internal/cidr"
 	"github.com/fly-go-run/approute-rules/internal/dlc"
+	"github.com/fly-go-run/approute-rules/internal/dnsmasq"
 	"github.com/fly-go-run/approute-rules/internal/rules"
 )
 
@@ -30,6 +31,8 @@ const (
 	telegramURL = "https://core.telegram.org/resources/cidr.txt"
 	googURL     = "https://www.gstatic.com/ipranges/goog.json"
 	cloudURL    = "https://www.gstatic.com/ipranges/cloud.json"
+	chinaURL    = "https://raw.githubusercontent.com/felixonmars/dnsmasq-china-list/master/accelerated-domains.china.conf"
+	chinaAPI    = "https://api.github.com/repos/felixonmars/dnsmasq-china-list/commits/master"
 )
 
 func main() {
@@ -60,6 +63,7 @@ func usage() {
 
 type versionsFile struct {
 	V2flyCommit string `json:"v2flyCommit"`
+	ChinaList   string `json:"chinaListCommit,omitempty"`
 }
 
 func runFetch(args []string) error {
@@ -70,6 +74,8 @@ func runFetch(args []string) error {
 	tg := fs.String("telegram-url", telegramURL, "Telegram cidr.txt")
 	gg := fs.String("goog-url", googURL, "goog.json")
 	cl := fs.String("cloud-url", cloudURL, "cloud.json")
+	ch := fs.String("china-url", chinaURL, "dnsmasq-china-list accelerated-domains.china.conf")
+	chAPI := fs.String("china-commit-url", chinaAPI, "GitHub API URL that returns the dnsmasq-china-list head commit ('' to skip)")
 	fs.Parse(args)
 
 	if err := os.MkdirAll(*work, 0o755); err != nil {
@@ -77,6 +83,7 @@ func runFetch(args []string) error {
 	}
 	for _, d := range []struct{ url, name string }{
 		{*ap, "delegated-apnic-latest"}, {*tg, "telegram-cidr.txt"}, {*gg, "goog.json"}, {*cl, "cloud.json"},
+		{*ch, "accelerated-domains.china.conf"},
 	} {
 		if err := download(d.url, filepath.Join(*work, d.name)); err != nil {
 			return err
@@ -90,8 +97,43 @@ func runFetch(args []string) error {
 	if err != nil {
 		return err
 	}
-	vb, _ := json.Marshal(versionsFile{V2flyCommit: commit})
+	vf := versionsFile{V2flyCommit: commit}
+	if *chAPI != "" {
+		// Only for the report; a failure (e.g. the API rate limit) leaves it "unknown".
+		if sha, err := headCommit(*chAPI); err != nil {
+			fmt.Fprintln(os.Stderr, "dnsmasq-china-list commit id not available:", err)
+		} else {
+			vf.ChinaList = sha
+		}
+	}
+	vb, _ := json.Marshal(vf)
 	return os.WriteFile(filepath.Join(*work, "versions.json"), vb, 0o644)
+}
+
+func headCommit(url string) (string, error) {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Accept", "application/vnd.github+json")
+	if tok := os.Getenv("GITHUB_TOKEN"); tok != "" {
+		req.Header.Set("Authorization", "Bearer "+tok)
+	}
+	resp, err := (&http.Client{Timeout: time.Minute}).Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", errors.New(resp.Status)
+	}
+	var v struct {
+		SHA string `json:"sha"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&v); err != nil {
+		return "", err
+	}
+	return v.SHA, nil
 }
 
 func download(url, dest string) error {
@@ -197,6 +239,7 @@ func runBuild(args []string) error {
 	tg := fs.String("telegram", "", "Telegram cidr.txt (default <work>/telegram-cidr.txt)")
 	goog := fs.String("goog", "", "goog.json (default <work>/goog.json)")
 	cloud := fs.String("cloud", "", "cloud.json (default <work>/cloud.json)")
+	china := fs.String("chinalist", "", "accelerated-domains.china.conf (default <work>/accelerated-domains.china.conf)")
 	fs.Parse(args)
 
 	def := func(v *string, name string) string {
@@ -216,6 +259,7 @@ func runBuild(args []string) error {
 		var vf versionsFile
 		if json.Unmarshal(vb, &vf) == nil {
 			ver.V2flyCommit = vf.V2flyCommit
+			ver.ChinaList = vf.ChinaList
 		}
 	}
 	af, err := os.Open(def(apnic, "delegated-apnic-latest"))
@@ -264,6 +308,17 @@ func runBuild(args []string) error {
 		return fmt.Errorf("cloud.json: %w", err)
 	}
 	ver.CloudTime = gj.CreationTime
+
+	chf, err := os.Open(def(china, "accelerated-domains.china.conf"))
+	if err != nil {
+		return err
+	}
+	src.ChinaList, ver.ChinaListBad, err = dnsmasq.ParseServerLines(chf)
+	chf.Close()
+	if err != nil {
+		return fmt.Errorf("dnsmasq-china-list: %w", err)
+	}
+	ver.ChinaListN = len(src.ChinaList)
 
 	files, err := rules.Compile(src)
 	if err != nil {

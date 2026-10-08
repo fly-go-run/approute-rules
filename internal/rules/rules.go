@@ -33,6 +33,9 @@ type Sources struct {
 	Telegram []netip.Prefix
 	Google   []netip.Prefix // goog.json
 	Cloud    []netip.Prefix // cloud.json
+	// ChinaList holds the domains of dnsmasq-china-list's accelerated-domains.china.conf;
+	// they are merged into geosite/cn only.
+	ChinaList []string
 }
 
 // File is one compiled output.
@@ -50,6 +53,15 @@ func Compile(src Sources) ([]File, error) {
 		entries, err := src.Lists.Resolve(name)
 		if err != nil {
 			return nil, err
+		}
+		if name == "cn" {
+			if len(src.ChinaList) == 0 {
+				return nil, errors.New("geosite/cn: dnsmasq-china-list is empty")
+			}
+			entries = slices.Clone(entries)
+			for _, d := range src.ChinaList {
+				entries = append(entries, dlc.Entry{Type: dlc.TypeDomain, Value: d})
+			}
 		}
 		lines, skipped := DomainLines(entries)
 		files = append(files, File{Path: "geosite/" + name + ".txt", Kind: "domain", Lines: lines, Skipped: skipped})
@@ -260,6 +272,9 @@ type Versions struct {
 	GoogleTime   string
 	CloudTime    string
 	TelegramSize int
+	ChinaList    string // upstream commit of dnsmasq-china-list
+	ChinaListN   int    // domains read from it
+	ChinaListBad int    // lines skipped as malformed
 }
 
 // Report is the human-readable build summary.
@@ -270,7 +285,8 @@ func Report(files []File, prev map[string]int, v Versions) string {
 	fmt.Fprintf(&b, "  APNIC delegated-apnic-latest  serial %s  end date %s\n", orUnknown(v.APNICSerial), orUnknown(v.APNICEnd))
 	fmt.Fprintf(&b, "  Google goog.json  %s\n", orUnknown(v.GoogleTime))
 	fmt.Fprintf(&b, "  Google cloud.json  %s\n", orUnknown(v.CloudTime))
-	fmt.Fprintf(&b, "  Telegram cidr.txt  %d lines\n\nsets\n", v.TelegramSize)
+	fmt.Fprintf(&b, "  Telegram cidr.txt  %d lines\n", v.TelegramSize)
+	fmt.Fprintf(&b, "  felixonmars/dnsmasq-china-list  commit %s  %d domains, %d malformed lines skipped (geosite/cn only)\n\nsets\n", orUnknown(v.ChinaList), v.ChinaListN, v.ChinaListBad)
 	fmt.Fprintf(&b, "  %-34s %9s %9s %9s %9s\n", "file", "entries", "previous", "keyword", "regexp")
 	for _, f := range files {
 		p := "-"

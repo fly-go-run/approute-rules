@@ -7,6 +7,7 @@
 | 输出 | 来源 | 许可证 |
 |---|---|---|
 | `geosite/*.txt` | [v2fly/domain-list-community](https://github.com/v2fly/domain-list-community) | MIT |
+| `geosite/cn.txt`（补充） | [felixonmars/dnsmasq-china-list](https://github.com/felixonmars/dnsmasq-china-list) 的 `accelerated-domains.china.conf`，只并入 `cn` | WTFPL |
 | `geoip/cn.txt` | [APNIC delegated-apnic-latest](https://ftp.apnic.net/stats/apnic/delegated-apnic-latest) 中国（CN）的 IPv4 / IPv6 分配记录 | APNIC 使用条款，可自由下载使用 |
 | `geoip/telegram.txt` | [Telegram 官方 cidr.txt](https://core.telegram.org/resources/cidr.txt) | 官方公布 |
 | `geoip/google.txt` | Google 官方 [goog.json](https://www.gstatic.com/ipranges/goog.json) 减去 [cloud.json](https://www.gstatic.com/ipranges/cloud.json) | 官方公布 |
@@ -39,7 +40,7 @@ https://github.com/fly-go-run/approute-rules/raw/release/geoip/<name>.txt
 ## 构建
 
 ```sh
-go run ./cmd/rulegen fetch -work work                       # 下载上游数据
+go run ./cmd/rulegen fetch -work work                       # 下载上游数据（GITHUB_TOKEN 可选，用于查 dnsmasq-china-list 的提交号）
 go run ./cmd/rulegen build -work work -out out              # 编译、校验、写出
 go run ./cmd/rulegen build -work work -out out -prev <上一次发布的目录>
 go vet ./... && go test ./...

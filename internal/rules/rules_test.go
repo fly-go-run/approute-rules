@@ -127,6 +127,8 @@ func TestCompileProducesAll19Files(t *testing.T) {
 		Telegram: []netip.Prefix{netip.MustParsePrefix("91.108.4.0/22")},
 		Google:   []netip.Prefix{netip.MustParsePrefix("8.8.8.0/24"), netip.MustParsePrefix("34.0.0.0/24")},
 		Cloud:    []netip.Prefix{netip.MustParsePrefix("34.0.0.0/16")},
+
+		ChinaList: []string{"long-tail.example.cn", "example-cn.com"}, // the second is already in the v2fly cn list
 	}
 	files, err := Compile(src)
 	if err != nil {
@@ -149,8 +151,16 @@ func TestCompileProducesAll19Files(t *testing.T) {
 		if f.Path == "geoip/google.txt" && !slices.Equal(f.Lines, []string{"8.8.8.0/24"}) {
 			t.Errorf("google = %v", f.Lines)
 		}
-		if f.Path == "geosite/cn.txt" && f.Skipped["keyword"] != 1 {
-			t.Errorf("cn skipped = %v", f.Skipped)
+		if f.Path == "geosite/cn.txt" {
+			if f.Skipped["keyword"] != 1 {
+				t.Errorf("cn skipped = %v", f.Skipped)
+			}
+			if !slices.Equal(f.Lines, []string{"+.example-cn.com", "+.long-tail.example.cn"}) {
+				t.Errorf("cn = %v", f.Lines)
+			}
+		}
+		if f.Path == "geosite/google.txt" && slices.Contains(f.Lines, "+.long-tail.example.cn") {
+			t.Error("the china list must only go into geosite/cn")
 		}
 	}
 	rep := Report(files, nil, Versions{V2flyCommit: "abc"})
@@ -165,5 +175,16 @@ func TestCompileFailsWhenAListIsMissing(t *testing.T) {
 	ls, _ := dlc.Parse(map[string]string{"cn": "a.cn"})
 	if _, err := Compile(Sources{Lists: ls}); err == nil {
 		t.Fatal("want error when a required list is missing")
+	}
+}
+
+func TestCompileFailsWithoutChinaList(t *testing.T) {
+	texts := map[string]string{}
+	for _, n := range GeositeSets {
+		texts[n] = "a-" + strings.ReplaceAll(n, "!", "x") + ".com\n"
+	}
+	ls, _ := dlc.Parse(texts)
+	if _, err := Compile(Sources{Lists: ls}); err == nil || !strings.Contains(err.Error(), "china-list") {
+		t.Fatalf("want china-list error, got %v", err)
 	}
 }
