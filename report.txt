@@ -10,24 +10,24 @@ upstream
 
 sets
   file                                 entries  previous   keyword    regexp
-  geosite/private.txt                      130         -         0         1
-  geosite/category-ai-cn.txt               115         -         0         0
-  geosite/category-ai-!cn.txt              188         -         0         1
-  geosite/youtube.txt                      177         -         0         0
-  geosite/netflix.txt                       24         -         0         4
-  geosite/disney.txt                       222         -         0         1
-  geosite/hbo.txt                           65         -         0         0
-  geosite/spotify.txt                       25         -         0         0
-  geosite/telegram.txt                      21         -         0         0
-  geosite/google.txt                       847         -         0         2
-  geosite/github.txt                        59         -         0         0
-  geosite/microsoft.txt                    640         -         0         0
-  geosite/apple.txt                       1585         -         0         0
-  geosite/geolocation-!cn.txt            24126         -         0       158
-  geosite/cn.txt                        111076         -         0         3
-  geoip/private.txt                         12         -         -         -
-  geoip/telegram.txt                        11         -         -         -
-  geoip/google.txt                         394         -         -         -
-  geoip/cn.txt                            7510         -         -         -
+  geosite/private.txt                      130       130         0         1
+  geosite/category-ai-cn.txt               115       115         0         0
+  geosite/category-ai-!cn.txt              188       188         0         1
+  geosite/youtube.txt                      177       177         0         0
+  geosite/netflix.txt                       24        24         0         4
+  geosite/disney.txt                       222       222         0         1
+  geosite/hbo.txt                           65        65         0         0
+  geosite/spotify.txt                       25        25         0         0
+  geosite/telegram.txt                      21        21         0         0
+  geosite/google.txt                       847       847         0         2
+  geosite/github.txt                        59        59         0         0
+  geosite/microsoft.txt                    640       640         0         0
+  geosite/apple.txt                       1585      1585         0         0
+  geosite/geolocation-!cn.txt            24126     24126         0       158
+  geosite/cn.txt                        111076    111076         0         3
+  geoip/private.txt                         18        12         -         -
+  geoip/telegram.txt                        11        11         -         -
+  geoip/google.txt                         394       394         -         -
+  geoip/cn.txt                            7510      7510         -         -
 
 keyword and regexp entries cannot be expressed in the domain behavior and are skipped.
