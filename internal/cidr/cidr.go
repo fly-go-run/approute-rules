@@ -15,15 +15,20 @@ import (
 	"strings"
 )
 
-// Private is the local-network list. It mirrors AppRoute's local-network exception
-// (RFC 1918, loopback, link-local, ULA, multicast, broadcast). 100.64.0.0/10 (tailnet,
-// carrier NAT) and 198.18.0.0/15 (the fake-IP range of enhanced mode) are left out on
-// purpose: they keep their rules.
+// Private is the set of special-purpose address blocks (IANA IPv4 and IPv6
+// special-purpose registries: "this network", RFC 1918, carrier-grade NAT, loopback,
+// link-local, IETF protocol assignments, documentation, 6to4 relay, benchmarking,
+// multicast and reserved, unspecified and loopback IPv6, ULA, link-local and
+// multicast IPv6). It is the rule set behind the built-in `RULE-SET,geoip-private,
+// DIRECT`, so it keeps 100.64.0.0/10 (carrier NAT, also used by tailnets) and
+// 198.18.0.0/15 (benchmarking) direct as before. AppRoute's local-network exception
+// is a separate, narrower check in the app and is not derived from this list.
 func Private() []netip.Prefix {
 	return mustPrefixes(
-		"0.0.0.0/8", "10.0.0.0/8", "127.0.0.0/8", "169.254.0.0/16", "172.16.0.0/12",
-		"192.168.0.0/16", "224.0.0.0/4", "255.255.255.255/32",
-		"::1/128", "fc00::/7", "fe80::/10", "ff00::/8",
+		"0.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "127.0.0.0/8", "169.254.0.0/16",
+		"172.16.0.0/12", "192.0.0.0/24", "192.0.2.0/24", "192.88.99.0/24", "192.168.0.0/16",
+		"198.18.0.0/15", "198.51.100.0/24", "203.0.113.0/24", "224.0.0.0/3",
+		"::/127", "fc00::/7", "fe80::/10", "ff00::/8",
 	)
 }
 

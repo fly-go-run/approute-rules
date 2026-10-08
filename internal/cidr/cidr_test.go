@@ -182,7 +182,7 @@ func TestParseLines(t *testing.T) {
 	}
 }
 
-func TestPrivateExcludesCGNATAndFakeIP(t *testing.T) {
+func TestPrivateSpecialPurposeBlocks(t *testing.T) {
 	priv := Private()
 	contains := func(s string) bool {
 		a := netip.MustParseAddr(s)
@@ -193,12 +193,12 @@ func TestPrivateExcludesCGNATAndFakeIP(t *testing.T) {
 		}
 		return false
 	}
-	for _, in := range []string{"10.1.2.3", "172.31.255.255", "192.168.1.1", "169.254.1.1", "127.0.0.1", "224.0.0.251", "255.255.255.255", "fe80::1", "fd00::1", "ff02::fb", "::1"} {
+	for _, in := range []string{"10.1.2.3", "172.31.255.255", "192.168.1.1", "169.254.1.1", "127.0.0.1", "224.0.0.251", "255.255.255.255", "fe80::1", "fd00::1", "ff02::fb", "::1", "::", "100.64.0.1", "100.127.255.254", "198.18.0.1", "192.0.2.1", "240.0.0.1"} {
 		if !contains(in) {
 			t.Errorf("%s should be private", in)
 		}
 	}
-	for _, out := range []string{"100.64.0.1", "100.127.255.254", "198.18.0.1", "8.8.8.8", "172.32.0.1", "2001:4860::1"} {
+	for _, out := range []string{"8.8.8.8", "172.32.0.1", "100.128.0.1", "198.20.0.1", "2001:4860::1", "::2"} {
 		if contains(out) {
 			t.Errorf("%s must not be private", out)
 		}
