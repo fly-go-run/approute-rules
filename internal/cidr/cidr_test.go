@@ -48,9 +48,10 @@ func TestRangeToPrefixes(t *testing.T) {
 	}
 }
 
-const apnicFixture = `2|apnic|20261009|7|19830613|20261008|+1000
+const apnicFixture = `2|apnic|20261009|8|19830613|20261008|+1000
 apnic|*|asn|*|1|summary
-apnic|*|ipv4|*|4|summary
+apnic|*|ipv4|*|5|summary
+apnic|*|ipv6|*|2|summary
 apnic|CN|asn|4134|1|20020801|allocated
 apnic|CN|ipv4|1.0.1.0|256|20110414|allocated
 apnic|CN|ipv4|1.0.2.0|512|20110414|allocated
@@ -74,6 +75,27 @@ func TestParseAPNIC(t *testing.T) {
 	}
 	if info.Serial != "20261009" || info.EndDate != "20261008" {
 		t.Errorf("info = %+v", info)
+	}
+}
+
+func TestParseAPNICRejectsTruncatedOrInconsistentFile(t *testing.T) {
+	// The IPv6 records are cut off, as after an interrupted download.
+	lines := strings.Split(strings.TrimSpace(apnicFixture), "\n")
+	truncated := strings.Join(lines[:len(lines)-2], "\n") + "\n"
+	cases := map[string]string{
+		"truncated":       truncated,
+		"no header":       strings.Join(lines[1:], "\n") + "\n",
+		"missing summary": strings.Replace(apnicFixture, "apnic|*|ipv6|*|2|summary\n", "", 1),
+		"header total":    strings.Replace(apnicFixture, "|20261009|8|", "|20261009|9|", 1),
+		"summary count":   strings.Replace(apnicFixture, "apnic|*|ipv4|*|5|summary", "apnic|*|ipv4|*|6|summary", 1),
+	}
+	for name, in := range cases {
+		if _, _, err := ParseAPNIC(strings.NewReader(in), "CN"); err == nil {
+			t.Errorf("%s: want an error", name)
+		}
+	}
+	if _, _, err := ParseAPNIC(strings.NewReader(apnicFixture), "CN"); err != nil {
+		t.Fatalf("the complete fixture must parse: %v", err)
 	}
 }
 
@@ -135,6 +157,11 @@ func TestParseGoogleJSON(t *testing.T) {
 	if _, _, err := ParseGoogleJSON(strings.NewReader(`{"prefixes":[{}]}`)); err == nil {
 		t.Error("want error for a prefix without address")
 	}
+	for _, empty := range []string{`{}`, `null`, `{"prefixes":[]}`, `{"prefixes":null}`} {
+		if _, _, err := ParseGoogleJSON(strings.NewReader(empty)); err == nil {
+			t.Errorf("%s: want an error for an empty prefix list", empty)
+		}
+	}
 }
 
 func TestParseLines(t *testing.T) {
@@ -147,6 +174,11 @@ func TestParseLines(t *testing.T) {
 	}
 	if _, err := ParseLines(strings.NewReader("not-an-ip\n")); err == nil {
 		t.Error("want error")
+	}
+	for _, empty := range []string{"", "\n\n", "# only a comment\n"} {
+		if _, err := ParseLines(strings.NewReader(empty)); err == nil {
+			t.Errorf("%q: want an error for an empty list", empty)
+		}
 	}
 }
 

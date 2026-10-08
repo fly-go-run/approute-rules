@@ -24,7 +24,7 @@ func writeFixture(t *testing.T, work string) {
 		}
 	}
 	files := map[string]string{
-		"delegated-apnic-latest":         "2|apnic|20261009|2|19830613|20261008|+1000\napnic|CN|ipv4|1.0.1.0|256|20110414|allocated\napnic|CN|ipv6|2001:250::|35|20000101|allocated\n",
+		"delegated-apnic-latest":         "2|apnic|20261009|2|19830613|20261008|+1000\napnic|*|asn|*|0|summary\napnic|*|ipv4|*|1|summary\napnic|*|ipv6|*|1|summary\napnic|CN|ipv4|1.0.1.0|256|20110414|allocated\napnic|CN|ipv6|2001:250::|35|20000101|allocated\n",
 		"telegram-cidr.txt":              "91.108.4.0/22\n2a0a:f280::/32\n",
 		"goog.json":                      `{"creationTime":"t1","prefixes":[{"ipv4Prefix":"8.8.8.0/24"},{"ipv4Prefix":"34.0.0.0/24"}]}`,
 		"cloud.json":                     `{"creationTime":"t2","prefixes":[{"ipv4Prefix":"34.0.0.0/16"}]}`,
@@ -69,6 +69,31 @@ func TestBuildWritesOutputAndRefusesToOverwriteOnRegression(t *testing.T) {
 	}
 	if _, statErr := os.Stat(out2); !os.IsNotExist(statErr) {
 		t.Errorf("output directory must not exist after a failed validation (stat err %v)", statErr)
+	}
+}
+
+func TestBuildFailsOnEmptyOrTruncatedSources(t *testing.T) {
+	cases := map[string]struct{ file, content string }{
+		"empty cloud {}":   {"cloud.json", `{}`},
+		"empty cloud null": {"cloud.json", `null`},
+		"empty cloud list": {"cloud.json", `{"prefixes":[]}`},
+		"empty goog list":  {"goog.json", `{"prefixes":[]}`},
+		"empty telegram":   {"telegram-cidr.txt", "# nothing\n"},
+		"truncated apnic":  {"delegated-apnic-latest", "2|apnic|20261009|2|19830613|20261008|+1000\napnic|*|asn|*|0|summary\napnic|*|ipv4|*|1|summary\napnic|*|ipv6|*|1|summary\napnic|CN|ipv4|1.0.1.0|256|20110414|allocated\n"},
+		"empty china list": {"accelerated-domains.china.conf", "# nothing\n"},
+	}
+	for name, c := range cases {
+		work, out := t.TempDir(), filepath.Join(t.TempDir(), "out")
+		writeFixture(t, work)
+		if err := os.WriteFile(filepath.Join(work, c.file), []byte(c.content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		if err := runBuild([]string{"-work", work, "-out", out}); err == nil {
+			t.Errorf("%s: want the build to fail", name)
+		}
+		if _, err := os.Stat(out); !os.IsNotExist(err) {
+			t.Errorf("%s: nothing may be written (stat err %v)", name, err)
+		}
 	}
 }
 

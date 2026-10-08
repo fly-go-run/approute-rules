@@ -5,6 +5,7 @@ package cidr
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"math/bits"
@@ -77,6 +78,10 @@ type APNICInfo struct {
 func ParseAPNIC(r io.Reader, country string) ([]netip.Prefix, APNICInfo, error) {
 	var out []netip.Prefix
 	var info APNICInfo
+	haveHeader := false
+	declaredTotal := 0
+	summary := map[string]int{} // type -> count promised by the summary lines
+	seen := map[string]int{}    // type -> records actually read (all countries)
 	sc := bufio.NewScanner(r)
 	sc.Buffer(make([]byte, 0, 64*1024), 1<<20)
 	for n := 1; sc.Scan(); n++ {
@@ -88,7 +93,23 @@ func ParseAPNIC(r io.Reader, country string) ([]netip.Prefix, APNICInfo, error) 
 		// The version line is the only one that does not start with the registry name.
 		if len(f) >= 6 && f[0] != "apnic" {
 			info = APNICInfo{Serial: f[2], EndDate: f[5]}
+			total, err := strconv.Atoi(f[3])
+			if err != nil {
+				return nil, info, fmt.Errorf("apnic line %d: bad record count in the header: %w", n, err)
+			}
+			haveHeader, declaredTotal = true, total
 			continue
+		}
+		if len(f) == 6 && f[5] == "summary" {
+			c, err := strconv.Atoi(f[4])
+			if err != nil {
+				return nil, info, fmt.Errorf("apnic line %d: bad summary count: %w", n, err)
+			}
+			summary[f[2]] = c
+			continue
+		}
+		if len(f) >= 7 && f[0] == "apnic" {
+			seen[f[2]]++
 		}
 		if len(f) < 7 || f[1] != country || (f[6] != "allocated" && f[6] != "assigned") {
 			continue
@@ -119,6 +140,25 @@ func ParseAPNIC(r io.Reader, country string) ([]netip.Prefix, APNICInfo, error) 
 	if err := sc.Err(); err != nil {
 		return nil, info, err
 	}
+	// A download cut off mid-file still parses record by record, so compare what was read
+	// with what the file itself declares: a short file must fail the build.
+	if !haveHeader {
+		return nil, info, errors.New("apnic: version header line missing")
+	}
+	total := 0
+	for _, typ := range []string{"asn", "ipv4", "ipv6"} {
+		want, ok := summary[typ]
+		if !ok {
+			return nil, info, fmt.Errorf("apnic: summary line for %s missing", typ)
+		}
+		if seen[typ] != want {
+			return nil, info, fmt.Errorf("apnic: %d %s records read, summary declares %d (truncated file?)", seen[typ], typ, want)
+		}
+		total += seen[typ]
+	}
+	if total != declaredTotal {
+		return nil, info, fmt.Errorf("apnic: %d records read, header declares %d (truncated file?)", total, declaredTotal)
+	}
 	return Aggregate(out), info, nil
 }
 
@@ -140,6 +180,9 @@ func ParseLines(r io.Reader) ([]netip.Prefix, error) {
 	}
 	if err := sc.Err(); err != nil {
 		return nil, err
+	}
+	if len(out) == 0 {
+		return nil, errors.New("no prefixes")
 	}
 	return Aggregate(out), nil
 }
@@ -173,6 +216,10 @@ func ParseGoogleJSON(r io.Reader) ([]netip.Prefix, GoogleJSON, error) {
 	var g GoogleJSON
 	if err := json.NewDecoder(r).Decode(&g); err != nil {
 		return nil, g, err
+	}
+	// {} / null / an empty list would make "goog minus cloud" publish every Google range.
+	if len(g.Prefixes) == 0 {
+		return nil, g, errors.New("no prefixes")
 	}
 	var out []netip.Prefix
 	for i, p := range g.Prefixes {
