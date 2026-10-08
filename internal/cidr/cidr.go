@@ -1,0 +1,269 @@
+// Package cidr turns the IP sources (APNIC, Telegram, Google, a fixed private list)
+// into sorted, minimal CIDR lists.
+package cidr
+
+import (
+	"bufio"
+	"encoding/json"
+	"fmt"
+	"io"
+	"math/bits"
+	"net/netip"
+	"slices"
+	"strconv"
+	"strings"
+)
+
+// Private is the local-network list. It mirrors AppRoute's local-network exception
+// (RFC 1918, loopback, link-local, ULA, multicast, broadcast). 100.64.0.0/10 (tailnet,
+// carrier NAT) and 198.18.0.0/15 (the fake-IP range of enhanced mode) are left out on
+// purpose: they keep their rules.
+func Private() []netip.Prefix {
+	return mustPrefixes(
+		"0.0.0.0/8", "10.0.0.0/8", "127.0.0.0/8", "169.254.0.0/16", "172.16.0.0/12",
+		"192.168.0.0/16", "224.0.0.0/4", "255.255.255.255/32",
+		"::1/128", "fc00::/7", "fe80::/10", "ff00::/8",
+	)
+}
+
+func mustPrefixes(s ...string) []netip.Prefix {
+	out := make([]netip.Prefix, len(s))
+	for i, v := range s {
+		out[i] = netip.MustParsePrefix(v)
+	}
+	return out
+}
+
+// RangeToPrefixes converts a first address and an address count (APNIC IPv4 records,
+// not always a power of two) into the fewest CIDR blocks.
+func RangeToPrefixes(start netip.Addr, count uint64) ([]netip.Prefix, error) {
+	if !start.Is4() {
+		return nil, fmt.Errorf("not an IPv4 address: %s", start)
+	}
+	if count == 0 {
+		return nil, fmt.Errorf("zero count at %s", start)
+	}
+	a := start.As4()
+	cur := uint64(a[0])<<24 | uint64(a[1])<<16 | uint64(a[2])<<8 | uint64(a[3])
+	if cur+count > 1<<32 {
+		return nil, fmt.Errorf("range %s+%d leaves the IPv4 space", start, count)
+	}
+	var out []netip.Prefix
+	for count > 0 {
+		size := uint64(1) << 32
+		if cur != 0 {
+			size = uint64(1) << bits.TrailingZeros64(cur)
+		}
+		for size > count {
+			size >>= 1
+		}
+		hostBits := bits.TrailingZeros64(size)
+		addr := netip.AddrFrom4([4]byte{byte(cur >> 24), byte(cur >> 16), byte(cur >> 8), byte(cur)})
+		out = append(out, netip.PrefixFrom(addr, 32-hostBits))
+		cur += size
+		count -= size
+	}
+	return out, nil
+}
+
+// APNICInfo is what the report prints about the delegation file.
+type APNICInfo struct {
+	Serial  string
+	EndDate string
+}
+
+// ParseAPNIC reads delegated-apnic-latest and returns the allocated and assigned
+// ipv4 / ipv6 records of one country, aggregated.
+func ParseAPNIC(r io.Reader, country string) ([]netip.Prefix, APNICInfo, error) {
+	var out []netip.Prefix
+	var info APNICInfo
+	sc := bufio.NewScanner(r)
+	sc.Buffer(make([]byte, 0, 64*1024), 1<<20)
+	for n := 1; sc.Scan(); n++ {
+		line := strings.TrimSpace(sc.Text())
+		if line == "" || line[0] == '#' {
+			continue
+		}
+		f := strings.Split(line, "|")
+		// The version line is the only one that does not start with the registry name.
+		if len(f) >= 6 && f[0] != "apnic" {
+			info = APNICInfo{Serial: f[2], EndDate: f[5]}
+			continue
+		}
+		if len(f) < 7 || f[1] != country || (f[6] != "allocated" && f[6] != "assigned") {
+			continue
+		}
+		switch f[2] {
+		case "ipv4":
+			start, err := netip.ParseAddr(f[3])
+			if err != nil {
+				return nil, info, fmt.Errorf("apnic line %d: %w", n, err)
+			}
+			count, err := strconv.ParseUint(f[4], 10, 64)
+			if err != nil {
+				return nil, info, fmt.Errorf("apnic line %d: %w", n, err)
+			}
+			ps, err := RangeToPrefixes(start, count)
+			if err != nil {
+				return nil, info, fmt.Errorf("apnic line %d: %w", n, err)
+			}
+			out = append(out, ps...)
+		case "ipv6":
+			p, err := netip.ParsePrefix(f[3] + "/" + f[4])
+			if err != nil {
+				return nil, info, fmt.Errorf("apnic line %d: %w", n, err)
+			}
+			out = append(out, p.Masked())
+		}
+	}
+	if err := sc.Err(); err != nil {
+		return nil, info, err
+	}
+	return Aggregate(out), info, nil
+}
+
+// ParseLines reads one CIDR (or bare address) per line; # starts a comment.
+func ParseLines(r io.Reader) ([]netip.Prefix, error) {
+	var out []netip.Prefix
+	sc := bufio.NewScanner(r)
+	for n := 1; sc.Scan(); n++ {
+		line, _, _ := strings.Cut(sc.Text(), "#")
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		p, err := parsePrefix(line)
+		if err != nil {
+			return nil, fmt.Errorf("line %d: %w", n, err)
+		}
+		out = append(out, p)
+	}
+	if err := sc.Err(); err != nil {
+		return nil, err
+	}
+	return Aggregate(out), nil
+}
+
+func parsePrefix(s string) (netip.Prefix, error) {
+	if !strings.Contains(s, "/") {
+		a, err := netip.ParseAddr(s)
+		if err != nil {
+			return netip.Prefix{}, err
+		}
+		return netip.PrefixFrom(a, a.BitLen()), nil
+	}
+	p, err := netip.ParsePrefix(s)
+	if err != nil {
+		return netip.Prefix{}, err
+	}
+	return p.Masked(), nil
+}
+
+// GoogleJSON is the shape of goog.json / cloud.json.
+type GoogleJSON struct {
+	SyncToken    string `json:"syncToken"`
+	CreationTime string `json:"creationTime"`
+	Prefixes     []struct {
+		IPv4 string `json:"ipv4Prefix"`
+		IPv6 string `json:"ipv6Prefix"`
+	} `json:"prefixes"`
+}
+
+func ParseGoogleJSON(r io.Reader) ([]netip.Prefix, GoogleJSON, error) {
+	var g GoogleJSON
+	if err := json.NewDecoder(r).Decode(&g); err != nil {
+		return nil, g, err
+	}
+	var out []netip.Prefix
+	for i, p := range g.Prefixes {
+		s := p.IPv4 + p.IPv6
+		if s == "" {
+			return nil, g, fmt.Errorf("prefix %d has no address", i)
+		}
+		pp, err := parsePrefix(s)
+		if err != nil {
+			return nil, g, fmt.Errorf("prefix %d: %w", i, err)
+		}
+		out = append(out, pp)
+	}
+	return Aggregate(out), g, nil
+}
+
+// Aggregate sorts, drops prefixes covered by another and merges adjacent siblings, so
+// the result is the smallest list covering the same addresses.
+func Aggregate(in []netip.Prefix) []netip.Prefix {
+	ps := slices.Clone(in)
+	for i := range ps {
+		ps[i] = ps[i].Masked()
+	}
+	slices.SortFunc(ps, func(a, b netip.Prefix) int {
+		if c := a.Addr().Compare(b.Addr()); c != 0 {
+			return c
+		}
+		return a.Bits() - b.Bits() // the shorter prefix (the larger block) first
+	})
+	var stack []netip.Prefix
+	for _, p := range ps {
+		if n := len(stack); n > 0 {
+			if last := stack[n-1]; last.Addr().BitLen() == p.Addr().BitLen() && last.Bits() <= p.Bits() && last.Contains(p.Addr()) {
+				continue
+			}
+		}
+		stack = append(stack, p)
+		for len(stack) >= 2 {
+			a, b := stack[len(stack)-2], stack[len(stack)-1]
+			if a.Bits() != b.Bits() || a.Bits() == 0 || a.Addr().BitLen() != b.Addr().BitLen() {
+				break
+			}
+			pa := netip.PrefixFrom(a.Addr(), a.Bits()-1).Masked()
+			pb := netip.PrefixFrom(b.Addr(), b.Bits()-1).Masked()
+			if pa != pb || a == b {
+				break
+			}
+			stack = append(stack[:len(stack)-2], pa)
+		}
+	}
+	return stack
+}
+
+// Subtract returns the addresses of a that are not in b (Google's documented way to get
+// the "Google services" ranges: goog.json minus cloud.json).
+func Subtract(a, b []netip.Prefix) []netip.Prefix {
+	var out []netip.Prefix
+	for _, p := range a {
+		out = diff(p, b, out)
+	}
+	return Aggregate(out)
+}
+
+func diff(p netip.Prefix, cuts []netip.Prefix, out []netip.Prefix) []netip.Prefix {
+	var overlapping []netip.Prefix
+	for _, c := range cuts {
+		if c.Bits() <= p.Bits() && c.Overlaps(p) { // c covers p entirely
+			return out
+		}
+		if c.Overlaps(p) {
+			overlapping = append(overlapping, c)
+		}
+	}
+	if len(overlapping) == 0 {
+		return append(out, p)
+	}
+	// p strictly contains some cut: split in two halves and recurse.
+	lo := netip.PrefixFrom(p.Addr(), p.Bits()+1)
+	hiAddr := p.Addr().As16()
+	bit := p.Bits() + 1
+	if p.Addr().Is4() {
+		bit += 96
+	}
+	hiAddr[(bit-1)/8] |= 0x80 >> ((bit - 1) % 8)
+	var hi netip.Prefix
+	if p.Addr().Is4() {
+		a4 := netip.AddrFrom16(hiAddr).Unmap()
+		hi = netip.PrefixFrom(a4, p.Bits()+1)
+	} else {
+		hi = netip.PrefixFrom(netip.AddrFrom16(hiAddr), p.Bits()+1)
+	}
+	out = diff(lo, overlapping, out)
+	return diff(hi, overlapping, out)
+}

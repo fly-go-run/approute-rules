@@ -1,0 +1,80 @@
+name: build
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Test
+        run: go vet ./... && go test ./...
+
+      - name: Check out the previous release (baseline for the validation)
+        id: prev
+        run: |
+          if git ls-remote --exit-code --heads origin release >/dev/null 2>&1; then
+            git fetch --depth=1 origin release
+            git worktree add release-out FETCH_HEAD
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            mkdir release-out
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Fetch upstream data
+        run: go run ./cmd/rulegen fetch -work work
+
+      - name: Build and validate
+        run: |
+          if [ "${{ steps.prev.outputs.exists }}" = "true" ]; then
+            go run ./cmd/rulegen build -work work -out out -prev release-out
+          else
+            go run ./cmd/rulegen build -work work -out out
+          fi
+
+      - name: Publish to the release branch when the rule data changed
+        run: |
+          set -eu
+          cd release-out
+          if [ "${{ steps.prev.outputs.exists }}" = "true" ]; then
+            git checkout -B release
+          else
+            git init -q -b release .
+            git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          fi
+          rm -rf geosite geoip
+          cp -R ../out/geosite ../out/geoip .
+          cp ../NOTICE NOTICE
+          git add geosite geoip NOTICE
+          if git diff --cached --quiet; then
+            echo "rule data unchanged, nothing to publish"
+            exit 0
+          fi
+          # report.txt carries the upstream versions; it is committed together with a data change.
+          cp ../out/report.txt report.txt
+          git add report.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "rules $(date -u +%Y-%m-%d)"
+          git push origin HEAD:release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
