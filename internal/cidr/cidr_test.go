@@ -62,11 +62,12 @@ apnic|CN|ipv6|2001:250::|35|20000101|allocated
 apnic|CN|ipv6|2001:250:2000::|35|20000101|allocated
 `
 
-func TestParseAPNIC(t *testing.T) {
-	got, info, err := ParseAPNIC(strings.NewReader(apnicFixture), "CN")
+func TestParseDelegatedAPNIC(t *testing.T) {
+	all, info, err := ParseDelegated(strings.NewReader(apnicFixture), "apnic")
 	if err != nil {
 		t.Fatal(err)
 	}
+	got := all["CN"]
 	// 1.0.1.0/24 + 1.0.2.0/23 stay (different alignment so no merge); 768 at 1.0.8.0 is /22 minus /24... = /23 + /24.
 	want := []string{"1.0.1.0/24", "1.0.2.0/23", "1.0.8.0/23", "1.0.10.0/24", "2001:250::/34"}
 	// 2001:250::/35 and 2001:250:2000::/35 are siblings and merge into a /34.
@@ -78,11 +79,11 @@ func TestParseAPNIC(t *testing.T) {
 	}
 }
 
-func TestParseAPNICAllGroupsByCountry(t *testing.T) {
+func TestParseDelegatedGroupsByCountry(t *testing.T) {
 	in := strings.Replace(apnicFixture, "apnic|CN|ipv4|1.0.1.0|256|20110414|allocated\n", "apnic|CN|ipv4|1.0.1.0|256|20110414|allocated\napnic|jp|ipv4|1.0.16.0|4096|20110414|assigned\n", 1)
 	in = strings.Replace(in, "|20261009|8|", "|20261009|9|", 1)
 	in = strings.Replace(in, "apnic|*|ipv4|*|5|summary", "apnic|*|ipv4|*|6|summary", 1)
-	all, _, err := ParseAPNICAll(strings.NewReader(in))
+	all, _, err := ParseDelegated(strings.NewReader(in), "apnic")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +95,7 @@ func TestParseAPNICAllGroupsByCountry(t *testing.T) {
 	}
 }
 
-func TestParseAPNICRejectsTruncatedOrInconsistentFile(t *testing.T) {
+func TestParseDelegatedRejectsTruncatedOrInconsistentFile(t *testing.T) {
 	// The IPv6 records are cut off, as after an interrupted download.
 	lines := strings.Split(strings.TrimSpace(apnicFixture), "\n")
 	truncated := strings.Join(lines[:len(lines)-2], "\n") + "\n"
@@ -106,17 +107,17 @@ func TestParseAPNICRejectsTruncatedOrInconsistentFile(t *testing.T) {
 		"summary count":   strings.Replace(apnicFixture, "apnic|*|ipv4|*|5|summary", "apnic|*|ipv4|*|6|summary", 1),
 	}
 	for name, in := range cases {
-		if _, _, err := ParseAPNIC(strings.NewReader(in), "CN"); err == nil {
+		if _, _, err := ParseDelegated(strings.NewReader(in), "apnic"); err == nil {
 			t.Errorf("%s: want an error", name)
 		}
 	}
-	if _, _, err := ParseAPNIC(strings.NewReader(apnicFixture), "CN"); err != nil {
+	if _, _, err := ParseDelegated(strings.NewReader(apnicFixture), "apnic"); err != nil {
 		t.Fatalf("the complete fixture must parse: %v", err)
 	}
 }
 
-func TestParseAPNICBadRecord(t *testing.T) {
-	if _, _, err := ParseAPNIC(strings.NewReader("apnic|CN|ipv4|nope|256|20110414|allocated\n"), "CN"); err == nil {
+func TestParseDelegatedBadRecord(t *testing.T) {
+	if _, _, err := ParseDelegated(strings.NewReader("apnic|CN|ipv4|nope|256|20110414|allocated\n"), "apnic"); err == nil {
 		t.Error("want error")
 	}
 }
@@ -218,5 +219,44 @@ func TestPrivateSpecialPurposeBlocks(t *testing.T) {
 		if contains(out) {
 			t.Errorf("%s must not be private", out)
 		}
+	}
+}
+
+// The extended files of the other registries: another registry name, a version like 2.3, an
+// opaque-id column, and available / reserved records without a country.
+const ripeFixture = `2.3|ripencc|1791496799|4|19700101|20261008|+0200
+ripencc|*|ipv4|*|3|summary
+ripencc|*|asn|*|0|summary
+ripencc|*|ipv6|*|1|summary
+ripencc|DE|ipv4|2.16.0.0|1048576|20100401|allocated|3a6f
+ripencc||ipv4|5.0.0.0|256||available
+ripencc|ZZ|ipv4|5.0.1.0|256||reserved|x
+ripencc|GB|ipv6|2a00:1450::|32|20100401|assigned|9b1c
+`
+
+func TestParseDelegatedExtendedFile(t *testing.T) {
+	all, info, err := ParseDelegated(strings.NewReader(ripeFixture), "ripencc")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Serial != "1791496799" || len(all) != 2 || !slices.Equal(strs(all["DE"]), []string{"2.16.0.0/12"}) || !slices.Equal(strs(all["GB"]), []string{"2a00:1450::/32"}) {
+		t.Fatalf("all = %v info = %+v", all, info)
+	}
+	// The summary counts the available and reserved records too.
+	if _, _, err := ParseDelegated(strings.NewReader(ripeFixture), "arin"); err == nil {
+		t.Error("a file of another registry must be refused")
+	}
+	cut := ripeFixture[:strings.LastIndex(strings.TrimSpace(ripeFixture), "\n")] + "\n"
+	if _, _, err := ParseDelegated(strings.NewReader(cut), "ripencc"); err == nil {
+		t.Error("a truncated extended file must be refused")
+	}
+}
+
+func TestMergeCountries(t *testing.T) {
+	a := map[string][]netip.Prefix{"US": {netip.MustParsePrefix("1.0.0.0/24")}}
+	b := map[string][]netip.Prefix{"US": {netip.MustParsePrefix("1.0.1.0/24")}, "DE": {netip.MustParsePrefix("2.0.0.0/24")}}
+	got := MergeCountries(a, b)
+	if !slices.Equal(strs(got["US"]), []string{"1.0.0.0/23"}) || len(got["DE"]) != 1 {
+		t.Fatalf("got %v", got)
 	}
 }

@@ -72,26 +72,22 @@ func RangeToPrefixes(start netip.Addr, count uint64) ([]netip.Prefix, error) {
 	return out, nil
 }
 
-// APNICInfo is what the report prints about the delegation file.
-type APNICInfo struct {
+// DelegatedInfo is what the report prints about a delegation file.
+type DelegatedInfo struct {
 	Serial  string
 	EndDate string
 }
 
-// ParseAPNIC returns the allocated and assigned ipv4 / ipv6 records of one country,
-// aggregated.
-func ParseAPNIC(r io.Reader, country string) ([]netip.Prefix, APNICInfo, error) {
-	all, info, err := ParseAPNICAll(r)
-	return all[country], info, err
-}
-
-// ParseAPNICAll reads delegated-apnic-latest and returns the allocated and assigned
-// ipv4 / ipv6 records per country code (upper case, as the file writes it), aggregated.
-// These are APNIC's own registrations only: a country whose address space belongs mostly
-// to another registry (the US, Germany, ...) gets just the small part APNIC delegated.
-func ParseAPNICAll(r io.Reader) (map[string][]netip.Prefix, APNICInfo, error) {
+// ParseDelegated reads a regional registry's delegation file (the format APNIC, ARIN,
+// RIPE NCC, LACNIC and AFRINIC share; registry is the name in the first field of a
+// record, e.g. "apnic", "ripencc") and returns the allocated and assigned ipv4 / ipv6
+// records per country code (upper case, as the file writes it), aggregated. Records of
+// the extended files that carry no country (available, reserved) are ignored. The
+// file's own header total and summary lines are checked against what was read, so a
+// truncated download fails.
+func ParseDelegated(r io.Reader, registry string) (map[string][]netip.Prefix, DelegatedInfo, error) {
 	byCountry := map[string][]netip.Prefix{}
-	var info APNICInfo
+	var info DelegatedInfo
 	haveHeader := false
 	declaredTotal := 0
 	summary := map[string]int{} // type -> count promised by the summary lines
@@ -105,11 +101,14 @@ func ParseAPNICAll(r io.Reader) (map[string][]netip.Prefix, APNICInfo, error) {
 		}
 		f := strings.Split(line, "|")
 		// The version line is the only one that does not start with the registry name.
-		if len(f) >= 6 && f[0] != "apnic" {
-			info = APNICInfo{Serial: f[2], EndDate: f[5]}
+		if len(f) >= 6 && f[0] != registry {
+			if f[1] != registry {
+				return nil, info, fmt.Errorf("%s: the header names registry %q", registry, f[1])
+			}
+			info = DelegatedInfo{Serial: f[2], EndDate: f[5]}
 			total, err := strconv.Atoi(f[3])
 			if err != nil {
-				return nil, info, fmt.Errorf("apnic line %d: bad record count in the header: %w", n, err)
+				return nil, info, fmt.Errorf("%s line %d: bad record count in the header: %w", registry, n, err)
 			}
 			haveHeader, declaredTotal = true, total
 			continue
@@ -117,12 +116,12 @@ func ParseAPNICAll(r io.Reader) (map[string][]netip.Prefix, APNICInfo, error) {
 		if len(f) == 6 && f[5] == "summary" {
 			c, err := strconv.Atoi(f[4])
 			if err != nil {
-				return nil, info, fmt.Errorf("apnic line %d: bad summary count: %w", n, err)
+				return nil, info, fmt.Errorf("%s line %d: bad summary count: %w", registry, n, err)
 			}
 			summary[f[2]] = c
 			continue
 		}
-		if len(f) >= 7 && f[0] == "apnic" {
+		if len(f) >= 7 && f[0] == registry {
 			seen[f[2]]++
 		}
 		if len(f) < 7 || len(f[1]) != 2 || f[1] == "ZZ" || (f[6] != "allocated" && f[6] != "assigned") {
@@ -133,21 +132,21 @@ func ParseAPNICAll(r io.Reader) (map[string][]netip.Prefix, APNICInfo, error) {
 		case "ipv4":
 			start, err := netip.ParseAddr(f[3])
 			if err != nil {
-				return nil, info, fmt.Errorf("apnic line %d: %w", n, err)
+				return nil, info, fmt.Errorf("%s line %d: %w", registry, n, err)
 			}
 			count, err := strconv.ParseUint(f[4], 10, 64)
 			if err != nil {
-				return nil, info, fmt.Errorf("apnic line %d: %w", n, err)
+				return nil, info, fmt.Errorf("%s line %d: %w", registry, n, err)
 			}
 			ps, err := RangeToPrefixes(start, count)
 			if err != nil {
-				return nil, info, fmt.Errorf("apnic line %d: %w", n, err)
+				return nil, info, fmt.Errorf("%s line %d: %w", registry, n, err)
 			}
 			byCountry[cc] = append(byCountry[cc], ps...)
 		case "ipv6":
 			p, err := netip.ParsePrefix(f[3] + "/" + f[4])
 			if err != nil {
-				return nil, info, fmt.Errorf("apnic line %d: %w", n, err)
+				return nil, info, fmt.Errorf("%s line %d: %w", registry, n, err)
 			}
 			byCountry[cc] = append(byCountry[cc], p.Masked())
 		}
@@ -158,26 +157,41 @@ func ParseAPNICAll(r io.Reader) (map[string][]netip.Prefix, APNICInfo, error) {
 	// A download cut off mid-file still parses record by record, so compare what was read
 	// with what the file itself declares: a short file must fail the build.
 	if !haveHeader {
-		return nil, info, errors.New("apnic: version header line missing")
+		return nil, info, fmt.Errorf("%s: version header line missing", registry)
 	}
 	total := 0
 	for _, typ := range []string{"asn", "ipv4", "ipv6"} {
 		want, ok := summary[typ]
 		if !ok {
-			return nil, info, fmt.Errorf("apnic: summary line for %s missing", typ)
+			return nil, info, fmt.Errorf("%s: summary line for %s missing", registry, typ)
 		}
 		if seen[typ] != want {
-			return nil, info, fmt.Errorf("apnic: %d %s records read, summary declares %d (truncated file?)", seen[typ], typ, want)
+			return nil, info, fmt.Errorf("%s: %d %s records read, summary declares %d (truncated file?)", registry, seen[typ], typ, want)
 		}
 		total += seen[typ]
 	}
 	if total != declaredTotal {
-		return nil, info, fmt.Errorf("apnic: %d records read, header declares %d (truncated file?)", total, declaredTotal)
+		return nil, info, fmt.Errorf("%s: %d records read, header declares %d (truncated file?)", registry, total, declaredTotal)
 	}
 	for cc, ps := range byCountry {
 		byCountry[cc] = Aggregate(ps)
 	}
 	return byCountry, info, nil
+}
+
+// MergeCountries joins per-country prefixes of several registries (a country can hold
+// space from more than one) and aggregates each.
+func MergeCountries(parts ...map[string][]netip.Prefix) map[string][]netip.Prefix {
+	out := map[string][]netip.Prefix{}
+	for _, m := range parts {
+		for cc, ps := range m {
+			out[cc] = append(out[cc], ps...)
+		}
+	}
+	for cc, ps := range out {
+		out[cc] = Aggregate(ps)
+	}
+	return out
 }
 
 // ParseLines reads one CIDR (or bare address) per line; # starts a comment.

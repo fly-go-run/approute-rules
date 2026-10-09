@@ -36,6 +36,19 @@ func writeFixture(t *testing.T, work string) {
 		"cloud.json":                     `{"creationTime":"t2","prefixes":[{"ipv4Prefix":"34.0.0.0/16"}]}`,
 		"accelerated-domains.china.conf": "# c\nserver=/long-tail.example.cn/114.114.114.114\nserver=/bad line\n",
 	}
+	// The other four registries use the extended format (opaque id, available / reserved records).
+	for _, r := range []struct{ name, file, cc, start string }{
+		{"arin", "delegated-arin-extended-latest", "US", "8.8.0.0"},
+		{"ripencc", "delegated-ripencc-extended-latest", "DE", "2.16.0.0"},
+		{"lacnic", "delegated-lacnic-extended-latest", "BR", "2.152.0.0"},
+		{"afrinic", "delegated-afrinic-extended-latest", "ZA", "41.0.0.0"},
+	} {
+		files[r.file] = "2.3|" + r.name + "|20261009|3|19700101|20261008|+0000\n" +
+			r.name + "|*|asn|*|0|summary\n" + r.name + "|*|ipv4|*|2|summary\n" + r.name + "|*|ipv6|*|1|summary\n" +
+			r.name + "|" + r.cc + "|ipv4|" + r.start + "|65536|20100101|allocated|abc\n" +
+			r.name + "||ipv4|9.9.0.0|256||available\n" +
+			r.name + "|" + r.cc + "|ipv6|2001:db8::|32|20100101|assigned|abc\n"
+	}
 	for n, c := range files {
 		if err := os.WriteFile(filepath.Join(work, n), []byte(c), 0o644); err != nil {
 			t.Fatal(err)
@@ -49,7 +62,7 @@ func TestBuildWritesOutputAndRefusesToOverwriteOnRegression(t *testing.T) {
 	if err := runBuild([]string{"-work", work, "-out", out}); err != nil {
 		t.Fatal(err)
 	}
-	for _, p := range []string{"geosite/cn.txt", "geosite/category-games.txt", "geosite/category-ai-!cn.txt", "geoip/cn.txt", "geoip/jp.txt",
+	for _, p := range []string{"geosite/cn.txt", "geosite/category-games.txt", "geosite/category-ai-!cn.txt", "geoip/cn.txt", "geoip/jp.txt", "geoip/us.txt", "geoip/de.txt", "geoip/br.txt", "geoip/za.txt",
 		"geoip/private.txt", "geoip/telegram.txt", "geoip/google.txt", "index.txt", "report.txt"} {
 		if _, err := os.Stat(filepath.Join(out, filepath.FromSlash(p))); err != nil {
 			t.Errorf("missing %s: %v", p, err)
@@ -60,6 +73,10 @@ func TestBuildWritesOutputAndRefusesToOverwriteOnRegression(t *testing.T) {
 	}
 	if idx, _ := os.ReadFile(filepath.Join(out, "index.txt")); !strings.Contains(string(idx), "geoip/jp.txt\n") || strings.Contains(string(idx), "kwonly") {
 		t.Errorf("index.txt:\n%s", idx)
+	}
+	us, _ := os.ReadFile(filepath.Join(out, "geoip", "us.txt"))
+	if string(us) != "8.8.0.0/16\n2001:db8::/32\n" {
+		t.Errorf("geoip/us.txt = %q", us)
 	}
 	jp, _ := os.ReadFile(filepath.Join(out, "geoip", "jp.txt"))
 	if string(jp) != "1.0.16.0/20\n" {
@@ -97,6 +114,7 @@ func TestBuildFailsOnEmptyOrTruncatedSources(t *testing.T) {
 		"empty goog list":  {"goog.json", `{"prefixes":[]}`},
 		"empty telegram":   {"telegram-cidr.txt", "# nothing\n"},
 		"truncated apnic":  {"delegated-apnic-latest", "2|apnic|20261009|3|19830613|20261008|+1000\napnic|*|asn|*|0|summary\napnic|*|ipv4|*|2|summary\napnic|*|ipv6|*|1|summary\napnic|CN|ipv4|1.0.1.0|256|20110414|allocated\n"},
+		"missing registry": {"delegated-afrinic-extended-latest", ""},
 		"empty china list": {"accelerated-domains.china.conf", "# nothing\n"},
 	}
 	for name, c := range cases {

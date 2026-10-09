@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/netip"
 	"os"
 	"path"
 	"path/filepath"
@@ -27,13 +28,23 @@ import (
 
 const (
 	v2flyURL    = "https://codeload.github.com/v2fly/domain-list-community/tar.gz/refs/heads/master"
-	apnicURL    = "https://ftp.apnic.net/stats/apnic/delegated-apnic-latest"
 	telegramURL = "https://core.telegram.org/resources/cidr.txt"
 	googURL     = "https://www.gstatic.com/ipranges/goog.json"
 	cloudURL    = "https://www.gstatic.com/ipranges/cloud.json"
 	chinaURL    = "https://raw.githubusercontent.com/felixonmars/dnsmasq-china-list/master/accelerated-domains.china.conf"
 	chinaAPI    = "https://api.github.com/repos/felixonmars/dnsmasq-china-list/commits/master"
 )
+
+// registries are the five regional internet registries. name is the registry field the
+// records start with; the extended files add an opaque id column and available / reserved
+// records, which the parser ignores.
+var registries = []struct{ name, label, url, file string }{
+	{"apnic", "APNIC", "https://ftp.apnic.net/stats/apnic/delegated-apnic-latest", "delegated-apnic-latest"},
+	{"arin", "ARIN", "https://ftp.arin.net/pub/stats/arin/delegated-arin-extended-latest", "delegated-arin-extended-latest"},
+	{"ripencc", "RIPE NCC", "https://ftp.ripe.net/pub/stats/ripencc/delegated-ripencc-extended-latest", "delegated-ripencc-extended-latest"},
+	{"lacnic", "LACNIC", "https://ftp.lacnic.net/pub/stats/lacnic/delegated-lacnic-extended-latest", "delegated-lacnic-extended-latest"},
+	{"afrinic", "AFRINIC", "https://ftp.afrinic.net/pub/stats/afrinic/delegated-afrinic-extended-latest", "delegated-afrinic-extended-latest"},
+}
 
 func main() {
 	if len(os.Args) < 2 {
@@ -70,7 +81,10 @@ func runFetch(args []string) error {
 	fs := flag.NewFlagSet("fetch", flag.ExitOnError)
 	work := fs.String("work", "work", "directory the upstream files are downloaded into")
 	v2 := fs.String("v2fly-url", v2flyURL, "domain-list-community tar.gz")
-	ap := fs.String("apnic-url", apnicURL, "delegated-apnic-latest")
+	regURL := make([]*string, len(registries))
+	for i, r := range registries {
+		regURL[i] = fs.String(r.name+"-url", r.url, r.label+" delegation file")
+	}
 	tg := fs.String("telegram-url", telegramURL, "Telegram cidr.txt")
 	gg := fs.String("goog-url", googURL, "goog.json")
 	cl := fs.String("cloud-url", cloudURL, "cloud.json")
@@ -82,10 +96,15 @@ func runFetch(args []string) error {
 		return err
 	}
 	for _, d := range []struct{ url, name string }{
-		{*ap, "delegated-apnic-latest"}, {*tg, "telegram-cidr.txt"}, {*gg, "goog.json"}, {*cl, "cloud.json"},
+		{*tg, "telegram-cidr.txt"}, {*gg, "goog.json"}, {*cl, "cloud.json"},
 		{*ch, "accelerated-domains.china.conf"},
 	} {
 		if err := download(d.url, filepath.Join(*work, d.name)); err != nil {
+			return err
+		}
+	}
+	for i, r := range registries {
+		if err := download(*regURL[i], filepath.Join(*work, r.file)); err != nil {
 			return err
 		}
 	}
@@ -235,7 +254,10 @@ func runBuild(args []string) error {
 	out := fs.String("out", "out", "output directory")
 	prevDir := fs.String("prev", "", "previous published output, for the half-count check")
 	dataDir := fs.String("v2fly", "", "domain-list-community data directory (default <work>/domain-list-community/data)")
-	apnic := fs.String("apnic", "", "delegated-apnic-latest (default <work>/delegated-apnic-latest)")
+	regFile := make([]*string, len(registries))
+	for i, r := range registries {
+		regFile[i] = fs.String(r.name, "", r.label+" delegation file (default <work>/"+r.file+")")
+	}
 	tg := fs.String("telegram", "", "Telegram cidr.txt (default <work>/telegram-cidr.txt)")
 	goog := fs.String("goog", "", "goog.json (default <work>/goog.json)")
 	cloud := fs.String("cloud", "", "cloud.json (default <work>/cloud.json)")
@@ -262,17 +284,21 @@ func runBuild(args []string) error {
 			ver.ChinaList = vf.ChinaList
 		}
 	}
-	af, err := os.Open(def(apnic, "delegated-apnic-latest"))
-	if err != nil {
-		return err
+	var parts []map[string][]netip.Prefix
+	for i, r := range registries {
+		f, err := os.Open(def(regFile[i], r.file))
+		if err != nil {
+			return err
+		}
+		m, info, err := cidr.ParseDelegated(f, r.name)
+		f.Close()
+		if err != nil {
+			return err
+		}
+		parts = append(parts, m)
+		ver.Registries = append(ver.Registries, rules.Registry{Name: r.label, Serial: info.Serial, EndDate: info.EndDate})
 	}
-	var info cidr.APNICInfo
-	src.Countries, info, err = cidr.ParseAPNICAll(af)
-	af.Close()
-	if err != nil {
-		return err
-	}
-	ver.APNICSerial, ver.APNICEnd = info.Serial, info.EndDate
+	src.Countries = cidr.MergeCountries(parts...)
 
 	tgPath := def(tg, "telegram-cidr.txt")
 	tf, err := os.Open(tgPath)

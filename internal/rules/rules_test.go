@@ -172,8 +172,8 @@ func TestCompileProducesBuiltInAndExtraFiles(t *testing.T) {
 			t.Error("the china list must only go into geosite/cn")
 		}
 	}
-	rep := Report(files, skips, nil, Versions{V2flyCommit: "abc"})
-	for _, want := range []string{"commit abc", "geosite/cn.txt", "geoip/private.txt", "geoip/jp.txt", "keyword", "lists without a file", "geosite/kwonly.txt"} {
+	rep := Report(files, skips, nil, Versions{V2flyCommit: "abc", Registries: []Registry{{"ARIN", "1", "20261008"}}})
+	for _, want := range []string{"commit abc", "ARIN delegated file  serial 1", "geosite/cn.txt", "geoip/private.txt", "geoip/jp.txt", "keyword", "lists without a file", "geosite/kwonly.txt"} {
 		if !strings.Contains(rep, want) {
 			t.Errorf("report lacks %q", want)
 		}

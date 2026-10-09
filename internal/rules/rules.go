@@ -35,7 +35,7 @@ var fileName = regexp.MustCompile(`^[a-z0-9][a-z0-9!-]*$`)
 // Sources holds everything the compiler reads, already parsed.
 type Sources struct {
 	Lists *dlc.Lists
-	// Countries are APNIC's allocated and assigned prefixes per country code (upper case).
+	// Countries are the allocated and assigned prefixes of the five regional registries per country code (upper case).
 	Countries map[string][]netip.Prefix
 	Telegram  []netip.Prefix
 	Google    []netip.Prefix // goog.json
@@ -334,11 +334,15 @@ func Write(dir string, files []File, report string) error {
 	return nil
 }
 
+// Registry is the identity of one delegation file in the report.
+type Registry struct {
+	Name, Serial, EndDate string
+}
+
 // Versions are the upstream identifiers printed in the report.
 type Versions struct {
 	V2flyCommit  string
-	APNICSerial  string
-	APNICEnd     string
+	Registries   []Registry // serial and end date of each delegation file read
 	GoogleTime   string
 	CloudTime    string
 	TelegramSize int
@@ -352,7 +356,9 @@ func Report(files []File, skips []Skip, prev map[string]int, v Versions) string 
 	var b strings.Builder
 	b.WriteString("approute-rules build report\n\nupstream\n")
 	fmt.Fprintf(&b, "  v2fly/domain-list-community  commit %s\n", orUnknown(v.V2flyCommit))
-	fmt.Fprintf(&b, "  APNIC delegated-apnic-latest  serial %s  end date %s\n", orUnknown(v.APNICSerial), orUnknown(v.APNICEnd))
+	for _, r := range v.Registries {
+		fmt.Fprintf(&b, "  %s delegated file  serial %s  end date %s\n", r.Name, orUnknown(r.Serial), orUnknown(r.EndDate))
+	}
 	fmt.Fprintf(&b, "  Google goog.json  %s\n", orUnknown(v.GoogleTime))
 	fmt.Fprintf(&b, "  Google cloud.json  %s\n", orUnknown(v.CloudTime))
 	fmt.Fprintf(&b, "  Telegram cidr.txt  %d lines\n", v.TelegramSize)
@@ -363,7 +369,7 @@ func Report(files []File, skips []Skip, prev map[string]int, v Versions) string 
 			geosites++
 		}
 	}
-	fmt.Fprintf(&b, "  %d files: %d geosite, %d geoip (APNIC's own registrations only, no ARIN / RIPE NCC / LACNIC / AFRINIC data); %d lists skipped\n\n", len(files), geosites, len(files)-geosites, len(skips))
+	fmt.Fprintf(&b, "  %d files: %d geosite, %d geoip (all five regional registries); %d lists skipped\n\n", len(files), geosites, len(files)-geosites, len(skips))
 	fmt.Fprintf(&b, "  %-34s %9s %9s %9s %9s\n", "file", "entries", "previous", "keyword", "regexp")
 	for _, f := range files {
 		p := "-"
