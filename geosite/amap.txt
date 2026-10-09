@@ -1,0 +1,11 @@
++.a-map.cn
++.a-map.co
++.a-map.link
++.a-map.vip
++.acloudrender.com
++.amap.com
++.amap.net
++.amapauto.com
++.anav.com
++.autonavi.com
++.gaode.com

@@ -29,13 +29,21 @@ from the sources below. The compiler (cmd/rulegen) is MIT licensed, see LICENSE.
    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE.
 
-2. APNIC delegated statistics (geoip/cn.txt)
-   https://ftp.apnic.net/stats/apnic/delegated-apnic-latest
-   The mainland China IPv4 and IPv6 ranges are computed from the records of country code
-   CN with status allocated or assigned. The data is used under the APNIC conditions of
-   use (https://www.apnic.net/about-apnic/legal/): it may be downloaded and used freely,
-   and APNIC gives no warranty. The file is a registry of address delegations, not a map
-   of physical locations, so it can differ from commercial GeoIP databases.
+2. Regional internet registry delegated statistics (geoip/<cc>.txt, including geoip/cn.txt)
+   APNIC   https://ftp.apnic.net/stats/apnic/delegated-apnic-latest
+   ARIN    https://ftp.arin.net/pub/stats/arin/delegated-arin-extended-latest
+   RIPE NCC https://ftp.ripe.net/pub/stats/ripencc/delegated-ripencc-extended-latest
+   LACNIC  https://ftp.lacnic.net/pub/stats/lacnic/delegated-lacnic-extended-latest
+   AFRINIC https://ftp.afrinic.net/pub/stats/afrinic/delegated-afrinic-extended-latest
+   The IPv4 and IPv6 ranges of each country or region code are computed from the records
+   with status allocated or assigned of all five files and merged by code (records
+   without a country, and available or reserved space, are ignored). Each registry
+   publishes these statistics openly for download; they are used under the conditions of
+   use each registry states on its website (for APNIC: https://www.apnic.net/about-apnic/legal/),
+   and no registry gives a warranty. The files are registries of address delegations,
+   not maps of physical locations, so the result can differ from commercial GeoIP
+   databases (an address block registered by a company in one country may be used in
+   another).
 
 3. Telegram (geoip/telegram.txt)
    https://core.telegram.org/resources/cidr.txt
