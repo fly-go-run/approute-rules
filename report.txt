@@ -1,18 +1,18 @@
 approute-rules build report
 
 upstream
-  v2fly/domain-list-community  commit e84921279c9142434b43cb84ec6c17f987e025df
+  v2fly/domain-list-community  commit c6adacf29cc4fb05e04651fcf03e00989ef9f797
   APNIC delegated-apnic-latest  serial 20261009  end date 20261008
-  Google goog.json  2026-10-08T07:05:05.555634
-  Google cloud.json  2026-10-08T07:05:05.555634
+  Google goog.json  2026-10-09T01:08:12.050967
+  Google cloud.json  2026-10-09T01:08:12.050967
   Telegram cidr.txt  14 lines
-  felixonmars/dnsmasq-china-list  commit 7184c9f1fe8817a04826e462dd695d08c5a68523  110679 domains, 0 malformed lines skipped (geosite/cn only)
+  felixonmars/dnsmasq-china-list  commit 3bc3f92d4f2376b86b3812d41a72c35b55798e78  111011 domains, 0 malformed lines skipped (geosite/cn only)
 
 sets
   file                                 entries  previous   keyword    regexp
   geosite/private.txt                      130       130         0         1
   geosite/category-ai-cn.txt               115       115         0         0
-  geosite/category-ai-!cn.txt              188       188         0         1
+  geosite/category-ai-!cn.txt              189       188         0         1
   geosite/youtube.txt                      177       177         0         0
   geosite/netflix.txt                       24        24         0         4
   geosite/disney.txt                       222       222         0         1
@@ -23,9 +23,9 @@ sets
   geosite/github.txt                        59        59         0         0
   geosite/microsoft.txt                    640       640         0         0
   geosite/apple.txt                       1585      1585         0         0
-  geosite/geolocation-!cn.txt            24126     24126         0       158
-  geosite/cn.txt                        111076    111076         0         3
-  geoip/private.txt                         18        12         -         -
+  geosite/geolocation-!cn.txt            24211     24126         0       158
+  geosite/cn.txt                        111407    111076         0         3
+  geoip/private.txt                         18        18         -         -
   geoip/telegram.txt                        11        11         -         -
   geoip/google.txt                         394       394         -         -
   geoip/cn.txt                            7510      7510         -         -
