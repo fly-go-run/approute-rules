@@ -161,6 +161,16 @@ func (ls *Lists) parseLines(name string, sc *bufio.Scanner, where string) error 
 	return sc.Err()
 }
 
+// Names lists every list in the directory, sorted (lower case).
+func (ls *Lists) Names() []string {
+	names := make([]string, 0, len(ls.lists))
+	for n := range ls.lists {
+		names = append(names, n)
+	}
+	slices.Sort(names)
+	return names
+}
+
 // Resolve returns the entries of a list including everything it includes, deduplicated
 // and sorted. A missing list or an include cycle is an error.
 func (ls *Lists) Resolve(name string) ([]Entry, error) {

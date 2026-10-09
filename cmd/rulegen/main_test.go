@@ -23,8 +23,14 @@ func writeFixture(t *testing.T, work string) {
 			t.Fatal(err)
 		}
 	}
+	// Lists beyond the 15 the built-in profile needs: one that is published, one that only has keywords.
+	for n, body := range map[string]string{"category-games": "domain:games.example\n", "kwonly": "keyword:ads\n"} {
+		if err := os.WriteFile(filepath.Join(data, n), []byte(body), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
 	files := map[string]string{
-		"delegated-apnic-latest":         "2|apnic|20261009|2|19830613|20261008|+1000\napnic|*|asn|*|0|summary\napnic|*|ipv4|*|1|summary\napnic|*|ipv6|*|1|summary\napnic|CN|ipv4|1.0.1.0|256|20110414|allocated\napnic|CN|ipv6|2001:250::|35|20000101|allocated\n",
+		"delegated-apnic-latest":         "2|apnic|20261009|3|19830613|20261008|+1000\napnic|*|asn|*|0|summary\napnic|*|ipv4|*|2|summary\napnic|*|ipv6|*|1|summary\napnic|CN|ipv4|1.0.1.0|256|20110414|allocated\napnic|JP|ipv4|1.0.16.0|4096|20110414|allocated\napnic|CN|ipv6|2001:250::|35|20000101|allocated\n",
 		"telegram-cidr.txt":              "91.108.4.0/22\n2a0a:f280::/32\n",
 		"goog.json":                      `{"creationTime":"t1","prefixes":[{"ipv4Prefix":"8.8.8.0/24"},{"ipv4Prefix":"34.0.0.0/24"}]}`,
 		"cloud.json":                     `{"creationTime":"t2","prefixes":[{"ipv4Prefix":"34.0.0.0/16"}]}`,
@@ -43,13 +49,24 @@ func TestBuildWritesOutputAndRefusesToOverwriteOnRegression(t *testing.T) {
 	if err := runBuild([]string{"-work", work, "-out", out}); err != nil {
 		t.Fatal(err)
 	}
-	for _, p := range append(rules.Paths(), "report.txt") {
+	for _, p := range []string{"geosite/cn.txt", "geosite/category-games.txt", "geosite/category-ai-!cn.txt", "geoip/cn.txt", "geoip/jp.txt",
+		"geoip/private.txt", "geoip/telegram.txt", "geoip/google.txt", "index.txt", "report.txt"} {
 		if _, err := os.Stat(filepath.Join(out, filepath.FromSlash(p))); err != nil {
 			t.Errorf("missing %s: %v", p, err)
 		}
 	}
+	if _, err := os.Stat(filepath.Join(out, "geosite", "kwonly.txt")); err == nil {
+		t.Error("a list with only keywords must not be published")
+	}
+	if idx, _ := os.ReadFile(filepath.Join(out, "index.txt")); !strings.Contains(string(idx), "geoip/jp.txt\n") || strings.Contains(string(idx), "kwonly") {
+		t.Errorf("index.txt:\n%s", idx)
+	}
+	jp, _ := os.ReadFile(filepath.Join(out, "geoip", "jp.txt"))
+	if string(jp) != "1.0.16.0/20\n" {
+		t.Errorf("geoip/jp.txt = %q", jp)
+	}
 	rep, _ := os.ReadFile(filepath.Join(out, "report.txt"))
-	if !strings.Contains(string(rep), "serial 20261009") {
+	if !strings.Contains(string(rep), "serial 20261009") || !strings.Contains(string(rep), "geosite/kwonly.txt") {
 		t.Errorf("report lacks the APNIC serial:\n%s", rep)
 	}
 
@@ -79,7 +96,7 @@ func TestBuildFailsOnEmptyOrTruncatedSources(t *testing.T) {
 		"empty cloud list": {"cloud.json", `{"prefixes":[]}`},
 		"empty goog list":  {"goog.json", `{"prefixes":[]}`},
 		"empty telegram":   {"telegram-cidr.txt", "# nothing\n"},
-		"truncated apnic":  {"delegated-apnic-latest", "2|apnic|20261009|2|19830613|20261008|+1000\napnic|*|asn|*|0|summary\napnic|*|ipv4|*|1|summary\napnic|*|ipv6|*|1|summary\napnic|CN|ipv4|1.0.1.0|256|20110414|allocated\n"},
+		"truncated apnic":  {"delegated-apnic-latest", "2|apnic|20261009|3|19830613|20261008|+1000\napnic|*|asn|*|0|summary\napnic|*|ipv4|*|2|summary\napnic|*|ipv6|*|1|summary\napnic|CN|ipv4|1.0.1.0|256|20110414|allocated\n"},
 		"empty china list": {"accelerated-domains.china.conf", "# nothing\n"},
 	}
 	for name, c := range cases {

@@ -78,10 +78,19 @@ type APNICInfo struct {
 	EndDate string
 }
 
-// ParseAPNIC reads delegated-apnic-latest and returns the allocated and assigned
-// ipv4 / ipv6 records of one country, aggregated.
+// ParseAPNIC returns the allocated and assigned ipv4 / ipv6 records of one country,
+// aggregated.
 func ParseAPNIC(r io.Reader, country string) ([]netip.Prefix, APNICInfo, error) {
-	var out []netip.Prefix
+	all, info, err := ParseAPNICAll(r)
+	return all[country], info, err
+}
+
+// ParseAPNICAll reads delegated-apnic-latest and returns the allocated and assigned
+// ipv4 / ipv6 records per country code (upper case, as the file writes it), aggregated.
+// These are APNIC's own registrations only: a country whose address space belongs mostly
+// to another registry (the US, Germany, ...) gets just the small part APNIC delegated.
+func ParseAPNICAll(r io.Reader) (map[string][]netip.Prefix, APNICInfo, error) {
+	byCountry := map[string][]netip.Prefix{}
 	var info APNICInfo
 	haveHeader := false
 	declaredTotal := 0
@@ -116,9 +125,10 @@ func ParseAPNIC(r io.Reader, country string) ([]netip.Prefix, APNICInfo, error) 
 		if len(f) >= 7 && f[0] == "apnic" {
 			seen[f[2]]++
 		}
-		if len(f) < 7 || f[1] != country || (f[6] != "allocated" && f[6] != "assigned") {
+		if len(f) < 7 || len(f[1]) != 2 || f[1] == "ZZ" || (f[6] != "allocated" && f[6] != "assigned") {
 			continue
 		}
+		cc := strings.ToUpper(f[1])
 		switch f[2] {
 		case "ipv4":
 			start, err := netip.ParseAddr(f[3])
@@ -133,13 +143,13 @@ func ParseAPNIC(r io.Reader, country string) ([]netip.Prefix, APNICInfo, error) 
 			if err != nil {
 				return nil, info, fmt.Errorf("apnic line %d: %w", n, err)
 			}
-			out = append(out, ps...)
+			byCountry[cc] = append(byCountry[cc], ps...)
 		case "ipv6":
 			p, err := netip.ParsePrefix(f[3] + "/" + f[4])
 			if err != nil {
 				return nil, info, fmt.Errorf("apnic line %d: %w", n, err)
 			}
-			out = append(out, p.Masked())
+			byCountry[cc] = append(byCountry[cc], p.Masked())
 		}
 	}
 	if err := sc.Err(); err != nil {
@@ -164,7 +174,10 @@ func ParseAPNIC(r io.Reader, country string) ([]netip.Prefix, APNICInfo, error) 
 	if total != declaredTotal {
 		return nil, info, fmt.Errorf("apnic: %d records read, header declares %d (truncated file?)", total, declaredTotal)
 	}
-	return Aggregate(out), info, nil
+	for cc, ps := range byCountry {
+		byCountry[cc] = Aggregate(ps)
+	}
+	return byCountry, info, nil
 }
 
 // ParseLines reads one CIDR (or bare address) per line; # starts a comment.

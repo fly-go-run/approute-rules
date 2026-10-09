@@ -64,7 +64,8 @@ jobs:
           rm -rf geosite geoip
           cp -R ../out/geosite ../out/geoip .
           cp ../NOTICE NOTICE
-          git add geosite geoip NOTICE
+          cp ../out/index.txt index.txt
+          git add geosite geoip NOTICE index.txt
           if git diff --cached --quiet; then
             echo "rule data unchanged, nothing to publish"
             exit 0

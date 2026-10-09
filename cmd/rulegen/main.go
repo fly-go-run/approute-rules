@@ -267,7 +267,7 @@ func runBuild(args []string) error {
 		return err
 	}
 	var info cidr.APNICInfo
-	src.CN, info, err = cidr.ParseAPNIC(af, "CN")
+	src.Countries, info, err = cidr.ParseAPNICAll(af)
 	af.Close()
 	if err != nil {
 		return err
@@ -320,7 +320,7 @@ func runBuild(args []string) error {
 	}
 	ver.ChinaListN = len(src.ChinaList)
 
-	files, err := rules.Compile(src)
+	files, skips, err := rules.Compile(src)
 	if err != nil {
 		return err
 	}
@@ -328,7 +328,7 @@ func runBuild(args []string) error {
 	if err != nil {
 		return err
 	}
-	report := rules.Report(files, prev, ver)
+	report := rules.Report(files, skips, prev, ver)
 	fmt.Print(report)
 	if err := rules.Validate(files, prev); err != nil {
 		return fmt.Errorf("validation failed, nothing written:\n%w", err)

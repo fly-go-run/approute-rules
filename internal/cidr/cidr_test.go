@@ -78,6 +78,22 @@ func TestParseAPNIC(t *testing.T) {
 	}
 }
 
+func TestParseAPNICAllGroupsByCountry(t *testing.T) {
+	in := strings.Replace(apnicFixture, "apnic|CN|ipv4|1.0.1.0|256|20110414|allocated\n", "apnic|CN|ipv4|1.0.1.0|256|20110414|allocated\napnic|jp|ipv4|1.0.16.0|4096|20110414|assigned\n", 1)
+	in = strings.Replace(in, "|20261009|8|", "|20261009|9|", 1)
+	in = strings.Replace(in, "apnic|*|ipv4|*|5|summary", "apnic|*|ipv4|*|6|summary", 1)
+	all, _, err := ParseAPNICAll(strings.NewReader(in))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := strs(all["JP"]); !slices.Equal(got, []string{"1.0.16.0/20"}) {
+		t.Fatalf("JP = %v", got)
+	}
+	if len(all["CN"]) != 5 || len(all) != 2 {
+		t.Fatalf("CN = %v, countries = %d", strs(all["CN"]), len(all))
+	}
+}
+
 func TestParseAPNICRejectsTruncatedOrInconsistentFile(t *testing.T) {
 	// The IPv6 records are cut off, as after an interrupted download.
 	lines := strings.Split(strings.TrimSpace(apnicFixture), "\n")
