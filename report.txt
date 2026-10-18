@@ -1,14 +1,14 @@
 approute-rules build report
 
 upstream
-  v2fly/domain-list-community  commit dd4e3c080cee602512768e8109f89fafaa94b8ca
-  APNIC delegated file  serial 20261017  end date 20261016
-  ARIN delegated file  serial 1792155620897  end date 20261016
-  RIPE NCC delegated file  serial 1792187999  end date 20261016
-  LACNIC delegated file  serial 20261016  end date 20261016
-  AFRINIC delegated file  serial 20261017  end date 20261017
-  Google goog.json  2026-10-16T19:05:49.031029
-  Google cloud.json  2026-10-16T19:05:49.031029
+  v2fly/domain-list-community  commit 10c47db24284b161d45b342247cfb47206590bf6
+  APNIC delegated file  serial 20261018  end date 20261016
+  ARIN delegated file  serial 1792242021008  end date 20261017
+  RIPE NCC delegated file  serial 1792274399  end date 20261017
+  LACNIC delegated file  serial 20261017  end date 20261016
+  AFRINIC delegated file  serial 20261018  end date 20261018
+  Google goog.json  2026-10-17T19:07:54.360553
+  Google cloud.json  2026-10-17T19:07:54.360553
   Telegram cidr.txt  14 lines
   felixonmars/dnsmasq-china-list  commit c79474a5445e7ebbde7275648b1078a0582510ab  109795 domains, 0 malformed lines skipped (geosite/cn only)
 
@@ -151,7 +151,7 @@ sets
   geosite/bbc.txt                           28        28         0         0
   geosite/bdsmhub.txt                        2         2         0         0
   geosite/beats.txt                        716       716         0         0
-  geosite/beget.txt                          2         2         0         0
+  geosite/beget.txt                         13         2         0         0
   geosite/beisen.txt                         8         8         0         0
   geosite/bestbuy.txt                       82        82         0         0
   geosite/bestchange.txt                     3         3         0         0
@@ -228,8 +228,8 @@ sets
   geosite/category-ads-all.txt             899       899         0         1
   geosite/category-ads-and-telemetry.txt       848       848         0         1
   geosite/category-ads-ir.txt                7         7         0         0
-  geosite/category-ai-!cn.txt              189       189         0         1
-  geosite/category-ai-chat-!cn.txt         189       189         0         1
+  geosite/category-ai-!cn.txt              192       189         0         1
+  geosite/category-ai-chat-!cn.txt         192       189         0         1
   geosite/category-ai-cn.txt               115       115         0         0
   geosite/category-ai-ru.txt                12        12         0         0
   geosite/category-android-app-download.txt        11        11         0         0
@@ -250,7 +250,7 @@ sets
   geosite/category-cdn-cn.txt               93        93         0         0
   geosite/category-collaborate-cn.txt        26        26         0         0
   geosite/category-communication.txt       149       149         0         0
-  geosite/category-companies.txt          7679      7679         0         6
+  geosite/category-companies.txt          7692      7679         0         6
   geosite/category-consent-management.txt        14        14         0         0
   geosite/category-container.txt             9         9         0         1
   geosite/category-cryptocurrency.txt       235       235         0         0
@@ -268,18 +268,18 @@ sets
   geosite/category-emby.txt                 83        83         0         0
   geosite/category-enhance-gaming.txt        18        18         0         0
   geosite/category-enterprise-query-platform-cn.txt        13        13         0         0
-  geosite/category-entertainment.txt      2060      2060         0        10
+  geosite/category-entertainment.txt      2063      2060         0        10
   geosite/category-entertainment-cn.txt       854       854         0         1
   geosite/category-entertainment-ru.txt        31        31         0         0
-  geosite/category-finance.txt             653       653         0         0
+  geosite/category-finance.txt             654       653         0         0
   geosite/category-food-cn.txt              58        58         0         0
   geosite/category-forums.txt              108       108         0         0
   geosite/category-forums-ir.txt             2         2         0         0
   geosite/category-forums-ru.txt            10        10         0         0
   geosite/category-game-accelerator-cn.txt        45        45         0         0
   geosite/category-game-platforms-download.txt       491       491         0         0
-  geosite/category-games.txt              1135      1135         0         4
-  geosite/category-games-!cn.txt           855       855         0         3
+  geosite/category-games.txt              1138      1135         0         4
+  geosite/category-games-!cn.txt           858       855         0         3
   geosite/category-games-cn.txt            282       282         0         1
   geosite/category-gov-ir.txt               29        29         0         0
   geosite/category-gov-ru.txt              142       142         0         0
@@ -318,7 +318,7 @@ sets
   geosite/category-public-tracker.txt       431       431         0         0
   geosite/category-remote-control.txt         8         8         0         0
   geosite/category-retail-ru.txt            79        79         0         0
-  geosite/category-ru.txt                  836       836         0         0
+  geosite/category-ru.txt                  846       836         0         0
   geosite/category-scholar-!cn.txt         475       475         0         0
   geosite/category-scholar-cn.txt           94        94         0         0
   geosite/category-scholar-hk.txt           32        32         0         0
@@ -391,7 +391,7 @@ sets
   geosite/cloudns.txt                        2         2         0         0
   geosite/clubhouse.txt                      3         3         0         0
   geosite/cmb.txt                           22        22         0         0
-  geosite/cn.txt                        110202    110246         0         3
+  geosite/cn.txt                        110202    110202         0         3
   geosite/cnb.txt                            2         2         0         0
   geosite/cnbc.txt                           4         4         0         0
   geosite/cnbeta.txt                         3         3         0         0
@@ -432,7 +432,7 @@ sets
   geosite/cuhk.txt                           8         8         0         0
   geosite/cuinc.txt                          2         2         0         0
   geosite/curseforge.txt                     2         2         0         0
-  geosite/cursor.txt                         4         4         0         0
+  geosite/cursor.txt                         5         4         0         0
   geosite/cuttly.txt                         1         1         0         0
   geosite/cybertrust.txt                     2         2         0         0
   geosite/cygames.txt                        5         5         0         0
@@ -606,7 +606,7 @@ sets
   geosite/geetest.txt                        2         2         0         0
   geosite/gemfury.txt                        6         6         0         0
   geosite/genotek-ru.txt                     9         9         0         0
-  geosite/geolocation-!cn.txt            24216     24216         0       158
+  geosite/geolocation-!cn.txt            24233     24216         0       158
   geosite/geolocation-cn.txt              7830      7830         0         3
   geosite/gettyimages.txt                   25        25         0         0
   geosite/getui.txt                          7         7         0         0
@@ -1036,7 +1036,7 @@ sets
   geosite/oneplus.txt                        7         7         0         0
   geosite/ookla-speedtest.txt               13        13         0         1
   geosite/op.txt                             2         2         0         0
-  geosite/openai.txt                        22        22         0         1
+  geosite/openai.txt                        23        22         0         1
   geosite/opencollective.txt                 1         1         0         0
   geosite/openjsfoundation.txt              12        12         0         0
   geosite/openrec.txt                        2         2         0         0
@@ -1109,7 +1109,7 @@ sets
   geosite/postimages.txt                     2         2         0         0
   geosite/pptv.txt                           3         3         0         0
   geosite/primevideo.txt                    23        23         0         0
-  geosite/private.txt                      130       130         0         1
+  geosite/private.txt                      132       130         0         1
   geosite/progress.txt                       6         6         0         0
   geosite/projectpoi.txt                     4         4         0         0
   geosite/projectsekai.txt                   2         2         0         0
@@ -1164,7 +1164,7 @@ sets
   geosite/reuters.txt                        4         4         0         0
   geosite/rferl.txt                         30        30         0         0
   geosite/riot.txt                          54        54         0         0
-  geosite/roblox.txt                        48        48         0         0
+  geosite/roblox.txt                        51        48         0         0
   geosite/rockstar.txt                       7         7         0         0
   geosite/roku.txt                           6         6         0         0
   geosite/rossiyasegodnya.txt               17        17         0         0
@@ -1194,7 +1194,7 @@ sets
   geosite/scaleflex.txt                      3         3         0         0
   geosite/scenesource.txt                    3         3         0         0
   geosite/schoopia.txt                       2         2         0         0
-  geosite/schwab.txt                         7         7         0         0
+  geosite/schwab.txt                         8         7         0         0
   geosite/sci.txt                            2         2         0         0
   geosite/sci-hub.txt                        6         6         0         0
   geosite/sciencedirect.txt                  2         2         0         0
@@ -1356,7 +1356,7 @@ sets
   geosite/tidelift.txt                       1         1         0         0
   geosite/tiktok.txt                        36        36         0         0
   geosite/tilda.txt                          6         6         0         0
-  geosite/timeweb.txt                        3         3         0         0
+  geosite/timeweb.txt                        5         3         0         0
   geosite/tinyurl.txt                        1         1         0         0
   geosite/tld-!cn.txt                      829       829         0         0
   geosite/tld-cn.txt                        49        49         0         0
@@ -1582,7 +1582,7 @@ sets
   geoip/bd.txt                            3828      3828         -         -
   geoip/be.txt                            1248      1248         -         -
   geoip/bf.txt                              79        79         -         -
-  geoip/bg.txt                            1616      1615         -         -
+  geoip/bg.txt                            1616      1616         -         -
   geoip/bh.txt                              71        71         -         -
   geoip/bi.txt                              19        19         -         -
   geoip/bj.txt                              54        54         -         -
@@ -1591,40 +1591,40 @@ sets
   geoip/bn.txt                              46        46         -         -
   geoip/bo.txt                             161       161         -         -
   geoip/bq.txt                              19        19         -         -
-  geoip/br.txt                           13887     13886         -         -
+  geoip/br.txt                           13887     13887         -         -
   geoip/bs.txt                              32        32         -         -
   geoip/bt.txt                              76        76         -         -
   geoip/bw.txt                              78        78         -         -
   geoip/by.txt                             137       137         -         -
   geoip/bz.txt                              88        88         -         -
-  geoip/ca.txt                            7603      7604         -         -
+  geoip/ca.txt                            7604      7603         -         -
   geoip/cd.txt                             108       108         -         -
   geoip/cf.txt                               6         6         -         -
   geoip/cg.txt                              31        31         -         -
-  geoip/ch.txt                            3558      3556         -         -
+  geoip/ch.txt                            3558      3558         -         -
   geoip/ci.txt                             254       254         -         -
   geoip/ck.txt                               4         4         -         -
   geoip/cl.txt                             975       975         -         -
   geoip/cm.txt                              84        84         -         -
-  geoip/cn.txt                            7552      7551         -         -
-  geoip/co.txt                            1270      1268         -         -
+  geoip/cn.txt                            7552      7552         -         -
+  geoip/co.txt                            1270      1270         -         -
   geoip/cr.txt                             278       278         -         -
   geoip/cu.txt                              23        23         -         -
   geoip/cv.txt                              29        29         -         -
   geoip/cw.txt                              66        66         -         -
   geoip/cy.txt                             924       924         -         -
   geoip/cz.txt                            2245      2245         -         -
-  geoip/de.txt                           11843     11841         -         -
+  geoip/de.txt                           11843     11843         -         -
   geoip/dj.txt                              11        11         -         -
   geoip/dk.txt                            1705      1705         -         -
   geoip/dm.txt                              19        19         -         -
   geoip/do.txt                             365       365         -         -
   geoip/dz.txt                              46        46         -         -
   geoip/ec.txt                             596       596         -         -
-  geoip/ee.txt                             625       624         -         -
+  geoip/ee.txt                             625       625         -         -
   geoip/eg.txt                             200       200         -         -
   geoip/er.txt                               1         1         -         -
-  geoip/es.txt                            4325      4322         -         -
+  geoip/es.txt                            4325      4325         -         -
   geoip/et.txt                              23        23         -         -
   geoip/eu.txt                               9         9         -         -
   geoip/fi.txt                            1300      1300         -         -
@@ -1634,7 +1634,7 @@ sets
   geoip/fo.txt                              18        18         -         -
   geoip/fr.txt                            5573      5573         -         -
   geoip/ga.txt                              33        33         -         -
-  geoip/gb.txt                           10263     10274         -         -
+  geoip/gb.txt                           10263     10263         -         -
   geoip/gd.txt                              25        25         -         -
   geoip/ge.txt                             395       395         -         -
   geoip/gf.txt                              12        12         -         -
@@ -1652,16 +1652,16 @@ sets
   geoip/gu.txt                              38        38         -         -
   geoip/gw.txt                               6         6         -         -
   geoip/gy.txt                              21        21         -         -
-  geoip/hk.txt                            3990      3989         -         -
+  geoip/hk.txt                            3990      3990         -         -
   geoip/hn.txt                             303       303         -         -
   geoip/hr.txt                             347       347         -         -
   geoip/ht.txt                              31        31         -         -
-  geoip/hu.txt                             828       827         -         -
-  geoip/id.txt                            7591      7588         -         -
-  geoip/ie.txt                             926       929         -         -
+  geoip/hu.txt                             828       828         -         -
+  geoip/id.txt                            7591      7591         -         -
+  geoip/ie.txt                             926       926         -         -
   geoip/il.txt                             943       943         -         -
   geoip/im.txt                              92        92         -         -
-  geoip/in.txt                           10094     10090         -         -
+  geoip/in.txt                           10094     10094         -         -
   geoip/io.txt                               3         3         -         -
   geoip/iq.txt                             405       405         -         -
   geoip/ir.txt                            2321      2321         -         -
@@ -1713,8 +1713,8 @@ sets
   geoip/mu.txt                             135       135         -         -
   geoip/mv.txt                              58        58         -         -
   geoip/mw.txt                              83        83         -         -
-  geoip/mx.txt                            1024      1021         -         -
-  geoip/my.txt                            1129      1131         -         -
+  geoip/mx.txt                            1024      1024         -         -
+  geoip/my.txt                            1129      1129         -         -
   geoip/mz.txt                              78        78         -         -
   geoip/na.txt                              54        54         -         -
   geoip/nc.txt                              55        55         -         -
@@ -1722,7 +1722,7 @@ sets
   geoip/nf.txt                               3         3         -         -
   geoip/ng.txt                             542       542         -         -
   geoip/ni.txt                              73        73         -         -
-  geoip/nl.txt                            7657      7658         -         -
+  geoip/nl.txt                            7657      7657         -         -
   geoip/no.txt                            1702      1702         -         -
   geoip/np.txt                             437       437         -         -
   geoip/nr.txt                               9         9         -         -
@@ -1730,10 +1730,10 @@ sets
   geoip/nz.txt                            1696      1696         -         -
   geoip/om.txt                             103       103         -         -
   geoip/pa.txt                             240       240         -         -
-  geoip/pe.txt                             463       464         -         -
+  geoip/pe.txt                             463       463         -         -
   geoip/pf.txt                              26        26         -         -
   geoip/pg.txt                              90        90         -         -
-  geoip/ph.txt                            1214      1212         -         -
+  geoip/ph.txt                            1214      1214         -         -
   geoip/pk.txt                            1118      1118         -         -
   geoip/pl.txt                            4934      4934         -         -
   geoip/pm.txt                               3         3         -         -
@@ -1753,8 +1753,8 @@ sets
   geoip/sb.txt                              20        20         -         -
   geoip/sc.txt                            1525      1525         -         -
   geoip/sd.txt                              44        44         -         -
-  geoip/se.txt                            2914      2913         -         -
-  geoip/sg.txt                            2239      2238         -         -
+  geoip/se.txt                            2914      2914         -         -
+  geoip/sg.txt                            2239      2239         -         -
   geoip/si.txt                             685       685         -         -
   geoip/sk.txt                             561       561         -         -
   geoip/sl.txt                              39        39         -         -
@@ -1766,13 +1766,13 @@ sets
   geoip/st.txt                               6         6         -         -
   geoip/sv.txt                             121       121         -         -
   geoip/sx.txt                              17        17         -         -
-  geoip/sy.txt                             226       225         -         -
+  geoip/sy.txt                             226       226         -         -
   geoip/sz.txt                              34        34         -         -
   geoip/tc.txt                               8         8         -         -
   geoip/td.txt                              25        25         -         -
   geoip/telegram.txt                        11        11         -         -
   geoip/tg.txt                              25        25         -         -
-  geoip/th.txt                             884       884         -         -
+  geoip/th.txt                             886       884         -         -
   geoip/tj.txt                              84        84         -         -
   geoip/tk.txt                               8         8         -         -
   geoip/tl.txt                              54        54         -         -
@@ -1784,9 +1784,9 @@ sets
   geoip/tv.txt                               3         3         -         -
   geoip/tw.txt                            1049      1049         -         -
   geoip/tz.txt                             279       279         -         -
-  geoip/ua.txt                            3295      3285         -         -
+  geoip/ua.txt                            3295      3295         -         -
   geoip/ug.txt                             149       149         -         -
-  geoip/us.txt                           40413     40374         -         -
+  geoip/us.txt                           40421     40413         -         -
   geoip/uy.txt                              99        99         -         -
   geoip/uz.txt                             227       227         -         -
   geoip/va.txt                               7         7         -         -
@@ -1794,13 +1794,13 @@ sets
   geoip/ve.txt                             458       458         -         -
   geoip/vg.txt                             248       248         -         -
   geoip/vi.txt                              30        30         -         -
-  geoip/vn.txt                            2226      2225         -         -
+  geoip/vn.txt                            2226      2226         -         -
   geoip/vu.txt                              31        31         -         -
   geoip/wf.txt                               4         4         -         -
   geoip/ws.txt                              24        24         -         -
   geoip/ye.txt                              35        35         -         -
   geoip/yt.txt                               1         1         -         -
-  geoip/za.txt                            2148      2146         -         -
+  geoip/za.txt                            2148      2148         -         -
   geoip/zm.txt                              55        55         -         -
   geoip/zw.txt                              64        64         -         -
 

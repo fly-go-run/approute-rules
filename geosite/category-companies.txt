@@ -1490,8 +1490,15 @@
 +.beddit.tv
 +.beesbfl.ru
 +.beescrm.ru
++.beget.app
++.beget.cloud
 +.beget.com
++.beget.de
++.beget.hosting
++.beget.pro
 +.beget.ru
++.beget.tech
++.begetcdn.cloud
 +.begin-trade.com
 +.behance.net
 +.behindthescreenz.com
@@ -1499,6 +1506,7 @@
 +.berizaryad.ru
 +.berkanawireless.com
 +.beru.ru
++.beserver.ru
 +.best4bim.com
 +.bestbeats4u.com
 +.bestbim.com
@@ -1512,6 +1520,7 @@
 +.betterbim.com
 +.betterwithautodesk.com
 +.beyondcore.com
++.bget.ru
 +.bhent.co.kr
 +.biitii.com
 +.bim-360.com
@@ -6348,6 +6357,7 @@
 +.sportsfacebook.com
 +.sportstream.com
 +.sprinklesapp.com
++.sprut.io
 +.sptvbroadcast.com
 +.sqlserveronlinux.com
 +.squ1.com
@@ -6523,6 +6533,8 @@
 +.timelinestoryteller.com
 +.timeweb.cloud
 +.timeweb.com
++.timeweb.tech
++.timewebcloud.kz
 +.tinkerboxapp.com
 +.tinkercad.com
 +.tinkerentertainment.com
@@ -7084,6 +7096,7 @@
 +.xn--80arpq.xn--p1ai
 +.xn--80asgb.xn--p1ai
 +.xn--90absjljw3g.xn--p1ai
++.xn--90aefb9d.xn--p1ai
 +.xn--9kr7l.com
 +.xn--9trs65b.com
 +.xn--cckwcxetd
