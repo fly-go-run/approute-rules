@@ -393,6 +393,7 @@ geosite/bing.txt
 geosite/bitauto.txt
 geosite/bitflyer.txt
 geosite/bitly.txt
+geosite/bitrix.txt
 geosite/bitsquare.txt
 geosite/bitwarden.txt
 geosite/bjyouth.txt
@@ -496,6 +497,7 @@ geosite/category-entertainment-cn.txt
 geosite/category-entertainment-ru.txt
 geosite/category-entertainment.txt
 geosite/category-finance.txt
+geosite/category-flight-simulator.txt
 geosite/category-food-cn.txt
 geosite/category-forums-ir.txt
 geosite/category-forums-ru.txt
@@ -1643,6 +1645,7 @@ geosite/v8.txt
 geosite/vancl.txt
 geosite/vanish.txt
 geosite/vaptcha.txt
+geosite/vatsim.txt
 geosite/veet.txt
 geosite/vercel.txt
 geosite/verisign-pki.txt

@@ -10,6 +10,7 @@
 +.arteldoc.com
 +.arteldoc.tv
 +.asiangooglenetwork.com
++.azbyka.ru
 +.b37mrtl.ru
 +.baltnews.com
 +.baltnews.lt
@@ -56,6 +57,10 @@
 +.notimundo.press
 +.oknovrossiu.ru
 +.pobeda.page
++.posledovania.ru
++.pravmir.com
++.pravmir.ru
++.pravoslavie.ru
 +.premiumlive.site
 +.pressria.ru
 +.radiosputnik.ru
@@ -137,5 +142,7 @@
 +.tok.media
 +.ukraina.ru
 +.watchingthehawks.com
++.webtypikon.ru
 +.worldcuprussia.com
++.xn--80adfddrquddgz.xn--p1ai
 +.xn--c1acbl2abdlkab1og.xn--p1ai

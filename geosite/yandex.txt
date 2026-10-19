@@ -118,4 +118,6 @@
 +.yccdn.ru
 +.ydb.tech
 +.yndx.net
+kp-config-smart-tv.akamaized.net
+kp-configs-smart-tv.s3.eu-central-1.amazonaws.com
 report.ap.yandex-net.ru

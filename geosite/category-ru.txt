@@ -26,6 +26,7 @@
 +.alfa.me
 +.alfabank.st
 +.algoritmika.org
++.amt-insurance.com
 +.antiphishing.nl
 +.aodahl.com
 +.apptrackpets.com
@@ -56,6 +57,13 @@
 +.beget.tech
 +.begetcdn.cloud
 +.best2pay.net
++.bitrix.info
++.bitrix24.com
++.bitrix24.net
++.bitrix24.tech
++.bitrix24public.com
++.bitrixphone.com
++.bitrixsoft.com
 +.bizmrg.com
 +.bk6bba-resources.com
 +.book1917.live
@@ -74,6 +82,7 @@
 +.cdn-vk.net
 +.cdnvideohub.com
 +.cert-gib.com
++.chat2desk.com
 +.chipcore.com
 +.chizhik.club
 +.cian.site
@@ -284,6 +293,7 @@
 +.jivochat.es
 +.jivochat.ng
 +.jivosite.com
++.joyreactor.cc
 +.jump.taxi
 +.justveryok.com
 +.kaspersky-labs.com
@@ -330,9 +340,11 @@
 +.kontur.host
 +.koronapay.com
 +.koshelek.app
++.ktalk.host
 +.ktech.team
 +.lenta.com
 +.lenta.tech
++.lexgarant.com
 +.lovina.app
 +.magnit.com
 +.mail-carrotquest.io
@@ -437,6 +449,7 @@
 +.polza.ai
 +.popmechanic.io
 +.poudobnee.com
++.pravmir.com
 +.premier.one
 +.premiumlive.site
 +.priovtb.com
@@ -458,8 +471,10 @@
 +.reaviz.com
 +.reg.cloud
 +.reg.com
++.renins.com
 +.reso-med.com
 +.restream-media.net
++.robohall.tech
 +.robotext.io
 +.rocketozon.by
 +.roistat.com
@@ -843,4 +858,6 @@
 +.yourgood.app
 +.zvuk-b2b.com
 +.zvuk.com
+kp-config-smart-tv.akamaized.net
+kp-configs-smart-tv.s3.eu-central-1.amazonaws.com
 mvideo.edna.io

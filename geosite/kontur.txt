@@ -1,3 +1,5 @@
 +.kontur-inc.com
 +.kontur.host
 +.kontur.ru
++.ktalk.host
++.ktalk.ru

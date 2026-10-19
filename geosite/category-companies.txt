@@ -852,7 +852,6 @@
 +.asfiovnxocqpcry.com.cn
 +.askfacebook.net
 +.askfacebook.org
-+.asobostudio.com
 +.asp-cc.com
 +.asp.net
 +.aspnetcdn.com
@@ -3056,7 +3055,6 @@
 +.flickr
 +.flickr.com
 +.flickr.net
-+.flightsimulator.com
 +.flipshare.com
 +.flipwithsurface.com
 +.flow.dev
@@ -5315,6 +5313,7 @@
 +.msudalosti.com
 +.msunlimitedcloudsummit.com
 +.mt.lv
++.mts-link.ru
 +.mts-ws.net
 +.mts.ru
 +.mtsbank.ru
@@ -5842,6 +5841,7 @@
 +.publishproxy.com
 +.pullstring.net
 +.pushgrow.io
++.pv-cdn.net
 +.pwabuilder.com
 +.pxt.io
 +.pyrobot.org
@@ -7649,6 +7649,7 @@ init-p01st-lb.push-apple.com.akadns.net
 init-s01st-lb.push-apple.com.akadns.net
 init.gc-lb.apple.com.akadns.net
 iphone-ld.origin-apple.com.akadns.net
+kp-config-smart-tv.akamaized.net
 mesu-cdn.apple.com.akadns.net
 mesu-china.apple.com.akadns.net
 mozilla-ohttp.fastly-edge.com

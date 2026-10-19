@@ -2270,7 +2270,6 @@
 +.asmr.gay
 +.asmrbuluo.com
 +.asn-online.org
-+.asobostudio.com
 +.asp-cc.com
 +.asp.net
 +.aspbjournals.org
@@ -8359,7 +8358,6 @@
 +.flickr
 +.flickr.com
 +.flickr.net
-+.flightsimulator.com
 +.flipfap.com
 +.flipnotestudio.com
 +.flipshare.com
@@ -13300,6 +13298,7 @@
 +.magestic.com
 +.magicalmirai.com
 +.magicmovies.com
++.magnific.com
 +.magnoliaav.com.cn
 +.mahajantech.com
 +.maidonanews.jp
@@ -14692,6 +14691,7 @@
 +.mt.lv
 +.mt0011.site
 +.mtao.fun
++.mts-link.ru
 +.mts-ws.net
 +.mts.ru
 +.mtsbank.ru
@@ -17340,6 +17340,7 @@
 +.postimages.org
 +.postimg.cc
 +.postini.com
++.postman.com
 +.posty.kr
 +.postyourgirls.ws
 +.potenza.jp
@@ -17578,6 +17579,7 @@
 +.pussyspace.net
 +.putinho.net
 +.putty.org
++.pv-cdn.net
 +.pvp.net
 +.pvp.tv
 +.pvt.sexy

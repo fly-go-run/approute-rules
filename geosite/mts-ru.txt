@@ -1,5 +1,6 @@
 +.dbo-dengi.online
 +.kion.ru
++.mts-link.ru
 +.mts-ws.net
 +.mts.ru
 +.mtsbank.ru
