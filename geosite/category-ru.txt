@@ -225,6 +225,7 @@
 +.gw2ru.com
 +.haicomdc.com
 +.hayya.ae
++.hellodoc.app
 +.hh.by
 +.hh.kz
 +.home.bank
@@ -352,6 +353,7 @@
 +.maritimebank.com
 +.mcc250.pub.3gppnetwork.org
 +.mcs.st
++.medrocket.me
 +.medsi.com
 +.medsi.pro
 +.megafon.com
@@ -622,6 +624,8 @@
 +.tehnodom.com
 +.telega.info
 +.telega.me
++.terratraf.com
++.terratraf.io
 +.tilda.cc
 +.tilda.ws
 +.tildaapi.com
