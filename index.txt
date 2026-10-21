@@ -799,6 +799,7 @@ geosite/flickr.txt
 geosite/flowus.txt
 geosite/flowwow.txt
 geosite/flutter.txt
+geosite/fluxer.txt
 geosite/flyio.txt
 geosite/focuschina.txt
 geosite/fonbet.txt

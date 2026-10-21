@@ -139,6 +139,8 @@
 +.smartedu.cn
 +.speiyou.com
 +.sydw8.com
++.szu.app
++.szu.moe
 +.tal.com
 +.tesoon.com
 +.tongxuepie.com
