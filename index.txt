@@ -719,6 +719,7 @@ geosite/dribbble.txt
 geosite/dropbox.txt
 geosite/drweb.txt
 geosite/dslreports.txt
+geosite/dsn-host.txt
 geosite/duckduckgo.txt
 geosite/duitang.txt
 geosite/duolingo.txt
@@ -773,6 +774,7 @@ geosite/faceit.txt
 geosite/falungong.txt
 geosite/familymart.txt
 geosite/fandom.txt
+geosite/fanfiction.txt
 geosite/fans66.txt
 geosite/fansta.txt
 geosite/farfetch.txt

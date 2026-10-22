@@ -1,4 +1,5 @@
 +.21centuryaccess.com
++.24.place
 +.4ebaytraders.com
 +.abb.travel
 +.accomable.com
@@ -287,6 +288,7 @@
 +.coupang.com
 +.coupangcdn.com
 +.cowboom.com
++.craftifyx.com
 +.craigslist.org
 +.crececonebay.com
 +.creditcardsbay.com
@@ -544,6 +546,7 @@
 +.fout.jp
 +.fragrancebay.com
 +.francemail.com
++.funko.com
 +.funpay.com
 +.funpay.ru
 +.futureshop.ca
@@ -570,6 +573,8 @@
 +.ggsel.net
 +.gittigidiyor.net
 +.gittigidiyorsikayet.com
++.glitchprod.com
++.glitchproductions.store
 +.gmossp-sp.jp
 +.goldnikeclub.com
 +.gonike.com
@@ -726,6 +731,7 @@
 +.liveauction.com
 +.loveminiso.com.br
 +.magnoliaav.com.cn
++.makeship.com
 +.marketexecutive.net
 +.miadidas.com
 +.micoach.com
@@ -965,6 +971,7 @@
 +.onlinegeeksquad.com
 +.onlyjobs.ru
 +.outletnike.com
++.ownaj.com
 +.ozon-credit.ru
 +.ozon-dostavka.ru
 +.ozon-tech.ru
@@ -1117,7 +1124,6 @@
 +.technogym.su
 +.telebay.com
 +.telesell.com
-+.templatemonster.com
 +.terapeack.com
 +.terapeak.ca
 +.terapeak.cn
@@ -1128,6 +1134,7 @@
 +.teraperk.com
 +.terrapeak.com
 +.texttobuy.org
++.tgtime.store
 +.thebayuk.com
 +.thedailysnkr.com
 +.theebayshop.com
@@ -1279,6 +1286,8 @@
 +.xn--yf1at58a.com
 +.xxbay.com
 +.yibei.org
++.youtooz.com
 api-p.videomarket.jp
 ebay-25-assets.s3-us-west-1.amazonaws.com
 ecapi-pchome.cdn.hinet.net
+funko.my.site.com

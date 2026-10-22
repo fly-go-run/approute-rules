@@ -479,6 +479,7 @@
 +.fanatical.com
 +.fanbox.cc
 +.fandango.com
++.fanfiction.net
 +.fanfictionero.com
 +.fast.com
 +.fc-buddyfight.com
@@ -517,6 +518,7 @@
 +.gaijinent.com
 +.game-repack.site
 +.gameapps.hk
++.gamebanana.com
 +.gamebase.com.tw
 +.gamebiz.jp
 +.gamebusiness.jp
@@ -1194,6 +1196,7 @@
 +.quiltmc.org
 +.quixel.com
 +.quixel.se
++.r2modman.com
 +.radgametools.com
 +.radiko-cf.com
 +.radiko.jp
@@ -1400,6 +1403,7 @@
 +.steamdeck.com
 +.steamgames.com
 +.steaminventoryhelper.com
++.steamos.cloud
 +.steampowered.com
 +.steampowered.com.8686c.com
 +.steamserver.net
@@ -1455,6 +1459,8 @@
 +.thewonderful101.com
 +.thisisgame.com
 +.thisispolaris.com
++.thunderstore.io
++.thunderstore.org
 +.tiberiumalliances.com
 +.tiburon.com
 +.tidal.com
@@ -1600,10 +1606,12 @@
 +.worldoftanks.eu
 +.worldofwarcraft.com
 +.worldofwarplanes.com
++.worldofwarships.asia
 +.worldofwarships.com
 +.worldseriesofwarzone.com
 +.wotblitz.com
 +.wowsblitz.com
++.wplace.live
 +.ws-blau.com
 +.ws-tcg.com
 +.wtmobile.com

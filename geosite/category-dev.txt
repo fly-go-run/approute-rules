@@ -168,6 +168,7 @@
 +.getcomposer.org
 +.getfedora.org
 +.getpaint.net
++.getsafety.com
 +.getsentry.com
 +.getzola.org
 +.gh.io
@@ -398,6 +399,7 @@
 +.pyrobot.org
 +.python.org
 +.pythonhosted.org
++.pyup.io
 +.qt-project.org
 +.qt.io
 +.quay.io
@@ -437,6 +439,7 @@
 +.rubygems.org
 +.rust-lang.org
 +.rustup.rs
++.safetycli.com
 +.sankie.net
 +.scala-lang.org
 +.scala-sbt.org
@@ -486,6 +489,7 @@
 +.system76.com
 +.talkingkotlin.com
 +.tampermonkey.net
++.templatemonster.com
 +.termius.com
 +.termux.com
 +.termux.dev
@@ -502,6 +506,7 @@
 +.tildacdn.net
 +.timelinestoryteller.com
 +.timestamp.apple.com
++.tmimgcdn.com
 +.topcoder.com
 +.ubuntu-touch.io
 +.ubuntu.com
