@@ -575,6 +575,7 @@ geosite/ccb.txt
 geosite/cctv.txt
 geosite/cdek.txt
 geosite/cdn77.txt
+geosite/cdprojekt.txt
 geosite/ceno.txt
 geosite/cerebras.txt
 geosite/cern.txt

@@ -160,6 +160,7 @@
 +.1password.co
 +.1password.com
 +.1password.community
++.1password.dev
 +.1password.eu
 +.1password.io
 +.1passwordservices.com
@@ -4900,6 +4901,10 @@
 +.cdnvideohub.com
 +.cdnxxx-proxy.co
 +.cdnxxx-proxy.xyz
++.cdpred.services
++.cdprojekt.com
++.cdprojekt.red
++.cdprojektred.com
 +.cebay.com
 +.cegid-cloud.cn
 +.ceicdata.com
@@ -5777,6 +5782,7 @@
 +.cyber-bay.org
 +.cybercrimecon.com
 +.cybermondaybeats4sale.com
++.cyberpunk.net
 +.cybersport.ru
 +.cybertrust.co.jp
 +.cybertrust.ne.jp
@@ -16925,6 +16931,7 @@
 +.playfabapi.com
 +.playfamily.ru
 +.playforceone.com
++.playgwent.com
 +.playhearthstone.com
 +.playmation.com
 +.playmeow.com
@@ -20504,6 +20511,7 @@
 +.thevirtualsexreview.com
 +.thewaltdisneycompany.com
 +.theweek.in
++.thewitcher.com
 +.thewonderful101.com
 +.theyxxx.com
 +.thieme-connect.com
